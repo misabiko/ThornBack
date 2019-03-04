@@ -3,7 +3,8 @@ extends Node
 const Block = preload("res://Block.tscn")
 onready var World = $".."
 const CHUNK_SIZE = 16
-const WORLD_HEIGHT = 10
+const SURFACE_HEIGHT = 16
+const WORLD_HEIGHT = 64
 
 var xOffset
 var zOffset
@@ -11,10 +12,19 @@ var zOffset
 func _ready():
 	for x in range(CHUNK_SIZE):
 		for z in range(CHUNK_SIZE):
-			var block = Block.instance()
-			var pos = Vector2(x + xOffset * CHUNK_SIZE, z + zOffset * CHUNK_SIZE)
-			block.translate(Vector3(pos.x, floor(World.noise.get_noise_2dv(pos) * 4), pos.y))
-			add_child(block)
+			var pos = Vector3(x + xOffset * CHUNK_SIZE, 0, z + zOffset * CHUNK_SIZE)
+			pos.y = floor((World.noise.get_noise_2d(pos.x / 5, pos.z / 5) / 2 + 0.5) * SURFACE_HEIGHT)
+			if x == 0 && z == 0:
+				print(pos)
+			newBlock(pos)
+			
+			#for y in range(pos.y):
+			#	newBlock(Vector3(pos.x, y, pos.z)) 
+
+func newBlock(pos):
+	var block = Block.instance()
+	block.translate(pos)
+	add_child(block)
 
 func _init(x, z):
 	xOffset = x
