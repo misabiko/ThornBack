@@ -1,7 +1,0 @@
-{
-    "parent": "block/cube_column",
-    "textures": {
-        "side": "blocks/mob_spawner",
-	"end": "blocks/mob_spawner_end"
-    }
-}
