@@ -1,6 +1,6 @@
 extends Node
 
-const Chunk = preload("res://Chunk.gd")
+const Chunk = preload("res://Scripts/Chunk.gd")
 var noise = OpenSimplexNoise.new()
 
 func _ready():
