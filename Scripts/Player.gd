@@ -4,7 +4,7 @@ const WALK_SPEED = 320
 const JUMP_FORCE = 10
 const FLY_SPEED = 300
 const GRAVITY = -9.8
-var vel = Vector3()
+#var vel = Vector3()
 
 func _process(delta):
 	var move = Vector3()
