@@ -17,11 +17,13 @@ var offset
 
 var voxels
 var material
+var surface_tool
+var vertex_count = 0
 
 func _ready():
-	mesh = ArrayMesh.new()
-	material = SpatialMaterial.new()
-	material.vertex_color_use_as_albedo = true
+	var last_time = OS.get_ticks_msec()
+	surface_tool = SurfaceTool.new()
+	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	
 	var face
 	voxels = []
@@ -48,13 +50,21 @@ func _ready():
 				newBlock(Vector3(pos.x, y, pos.z), 2 if y < 2 else 3)
 	
 	greedy_mesher()
+	
+	surface_tool.generate_tangents()
+	mesh = surface_tool.commit()
+	var material = SpatialMaterial.new()
+	material.vertex_color_use_as_albedo = true
+	material_override = material
+	
+	print("time: ", OS.get_ticks_msec() - last_time)	
 
 func newBlock(pos, type):
 	#var block = Block.instance()
 	#block.translate(pos)
+	#add_child(block)
 	voxels[pos.x][pos.y][pos.z].type = type
 	voxels[pos.x][pos.y][pos.z].transparent = false
-	#add_child(block)
 
 #TODO add rob's comments
 #TODO consider turning x and q into vectors
@@ -187,28 +197,68 @@ func _init(x, z):
 
 #TODO consider changing param order
 func add_quad(bottom_left, top_left, top_right, bottom_right, voxel, back_face):
-	var arrays = []
-	arrays.resize(ArrayMesh.ARRAY_MAX)
-	
-	arrays[ArrayMesh.ARRAY_VERTEX] = [
-		bottom_left, bottom_right, top_left, top_right
-	]
-	
-	arrays[ArrayMesh.ARRAY_INDEX] = PoolIntArray([2,0,1, 1,3,2] if back_face else [2,3,1, 1,0,2])
-	var color_array = []
-	for i in range(4):
-		match voxel.type:
-			1:
-				color_array.push_back(Color.red)
-			2:
-				color_array.push_back(Color.green)
-			_:
-				color_array.push_back(Color.blue)
-				
-	arrays[ArrayMesh.ARRAY_COLOR] = PoolColorArray(color_array)
-	
-	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
-	mesh.surface_set_material(mesh.get_surface_count() - 1, material)
+	var color
+	match voxel.type:
+		1:
+			color = Color.red
+		2:
+			color = Color.green
+		_:
+			color = Color.blue
+
+	var normal
+	match voxel.side:
+		SOUTH:
+			normal = Vector3.BACK
+		NORTH:
+			normal = Vector3.FORWARD
+		EAST:
+			normal = Vector3.RIGHT
+		WEST:
+			normal = Vector3.LEFT
+		TOP:
+			normal = Vector3.UP
+		BOTTOM:
+			normal = Vector3.DOWN
+
+	surface_tool.add_color(color)
+	surface_tool.add_uv(Vector2(0, 0))
+	surface_tool.add_normal(normal)
+	surface_tool.add_vertex(bottom_left)
+
+	surface_tool.add_color(color)
+	surface_tool.add_uv(Vector2(1, 0))
+	surface_tool.add_normal(normal)
+	surface_tool.add_vertex(bottom_right)
+
+	surface_tool.add_color(color)
+	surface_tool.add_uv(Vector2(0, 1))
+	surface_tool.add_normal(normal)
+	surface_tool.add_vertex(top_left)
+
+	surface_tool.add_color(color)
+	surface_tool.add_uv(Vector2(1, 1))
+	surface_tool.add_normal(normal)
+	surface_tool.add_vertex(top_right)
+
+	if back_face:
+		surface_tool.add_index(vertex_count + 2)
+		surface_tool.add_index(vertex_count + 3)
+		surface_tool.add_index(vertex_count + 1)
+
+		surface_tool.add_index(vertex_count + 1)
+		surface_tool.add_index(vertex_count + 0)
+		surface_tool.add_index(vertex_count + 2)
+	else:
+		surface_tool.add_index(vertex_count + 2)
+		surface_tool.add_index(vertex_count + 0)
+		surface_tool.add_index(vertex_count + 1)
+
+		surface_tool.add_index(vertex_count + 1)
+		surface_tool.add_index(vertex_count + 3)
+		surface_tool.add_index(vertex_count + 2)
+
+	vertex_count += 4
 
 func get_voxel_face(pos, side):
 	var voxel_face = voxels[pos.x][pos.y][pos.z]
