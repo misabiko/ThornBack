@@ -1,6 +1,8 @@
 extends MeshInstance
 
-const Block = preload("res://Scenes/Block.tscn")
+var Block = preload("res://Scripts/Block.gd")
+var material = preload("res://Materials/block_material.tres")
+
 onready var World = $".."
 const CHUNK_SIZE = 16
 const SURFACE_HEIGHT = 60
@@ -16,7 +18,6 @@ const BOTTOM = 5
 var offset
 
 var voxels
-var material
 var surface_tool
 var vertex_count = 0
 
@@ -45,7 +46,7 @@ func _ready():
 			var pos = Vector3(x, 0, z)
 			pos.y = floor((World.noise.get_noise_2d((pos.x + translation.x) / 5, (pos.z + translation.z) / 5) / 2 + 0.5) * SURFACE_HEIGHT)
 			newBlock(pos, 1)
-	
+
 			for y in range(pos.y):
 				newBlock(Vector3(pos.x, y, pos.z), 2 if y < 2 else 3)
 	
@@ -53,8 +54,6 @@ func _ready():
 	
 	surface_tool.generate_tangents()
 	mesh = surface_tool.commit()
-	var material = SpatialMaterial.new()
-	material.vertex_color_use_as_albedo = true
 	material_override = material
 	
 	print("time: ", OS.get_ticks_msec() - last_time)	
@@ -197,14 +196,8 @@ func _init(x, z):
 
 #TODO consider changing param order
 func add_quad(bottom_left, top_left, top_right, bottom_right, voxel, back_face):
-	var color
-	match voxel.type:
-		1:
-			color = Color.red
-		2:
-			color = Color.green
-		_:
-			color = Color.blue
+	#TODO add proper key to voxel
+	var uv = Block.BlockTypes.values()[voxel.type - 1].texture
 
 	var normal
 	match voxel.side:
@@ -221,23 +214,19 @@ func add_quad(bottom_left, top_left, top_right, bottom_right, voxel, back_face):
 		BOTTOM:
 			normal = Vector3.DOWN
 
-	surface_tool.add_color(color)
-	surface_tool.add_uv(Vector2(0, 0))
+	surface_tool.add_uv(uv)
 	surface_tool.add_normal(normal)
 	surface_tool.add_vertex(bottom_left)
 
-	surface_tool.add_color(color)
-	surface_tool.add_uv(Vector2(1, 0))
+	surface_tool.add_uv(uv + Vector2(0.25, 0))
 	surface_tool.add_normal(normal)
 	surface_tool.add_vertex(bottom_right)
 
-	surface_tool.add_color(color)
-	surface_tool.add_uv(Vector2(0, 1))
+	surface_tool.add_uv(uv + Vector2(0, 0.5))
 	surface_tool.add_normal(normal)
 	surface_tool.add_vertex(top_left)
 
-	surface_tool.add_color(color)
-	surface_tool.add_uv(Vector2(1, 1))
+	surface_tool.add_uv(uv + Vector2(0.25, 0.5))
 	surface_tool.add_normal(normal)
 	surface_tool.add_vertex(top_right)
 

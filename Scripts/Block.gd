@@ -1,4 +1,13 @@
 extends StaticBody
 
-const BlockTypes = ["cobblestone", "dirt", "grass"]
-#var cobblestoneTexture = preload("res://newstart_textures/assets/minecraft/textures/blocks/cobblestone.png")
+const BlockTypes = {
+	"Dirt": {
+		"texture": Vector2(0.5, 0)
+	},
+	"Cobblestone": {
+		"texture": Vector2(0.75, 0)
+	},
+	"Grass": {
+		"texture": Vector2(0.25, 0)
+	}
+}
