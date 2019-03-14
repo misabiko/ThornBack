@@ -19,12 +19,16 @@ var offset
 
 var voxels
 var surface_tool
-var vertex_count = 0
+
+var mesh_data = {
+	"vertices": [],
+	"normals": [],
+	"uvs": [],
+	"indices": []
+}
 
 func _ready():
 	var last_time = OS.get_ticks_msec()
-	surface_tool = SurfaceTool.new()
-	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
 	
 	var face
 	voxels = []
@@ -52,8 +56,8 @@ func _ready():
 	
 	greedy_mesher()
 	
-	surface_tool.generate_tangents()
-	mesh = surface_tool.commit()
+	surface_tool = SurfaceTool.new()
+	update_mesh()
 	material_override = material
 	
 	print("time: ", OS.get_ticks_msec() - last_time)	
@@ -213,41 +217,36 @@ func add_quad(bottom_left, top_left, top_right, bottom_right, voxel, back_face):
 			normal = Vector3.UP
 		BOTTOM:
 			normal = Vector3.DOWN
+	
+	for i in ([2,3,1, 1,0,2] if back_face else [2,0,1, 1,3,2]):
+		mesh_data.indices.push_back(mesh_data.vertices.size() + i)
 
-	surface_tool.add_uv(uv)
-	surface_tool.add_normal(normal)
-	surface_tool.add_vertex(bottom_left)
+	mesh_data.uvs.push_back(uv)
+	mesh_data.uvs.push_back(uv + Vector2(0.25, 0))
+	mesh_data.uvs.push_back(uv + Vector2(0, 0.5))
+	mesh_data.uvs.push_back(uv + Vector2(0.25, 0.5))
+	
+	for i in range(4):
+		mesh_data.normals.push_back(normal)
+	
+	mesh_data.vertices.push_back(bottom_left)
+	mesh_data.vertices.push_back(bottom_right)
+	mesh_data.vertices.push_back(top_left)
+	mesh_data.vertices.push_back(top_right)
 
-	surface_tool.add_uv(uv + Vector2(0.25, 0))
-	surface_tool.add_normal(normal)
-	surface_tool.add_vertex(bottom_right)
-
-	surface_tool.add_uv(uv + Vector2(0, 0.5))
-	surface_tool.add_normal(normal)
-	surface_tool.add_vertex(top_left)
-
-	surface_tool.add_uv(uv + Vector2(0.25, 0.5))
-	surface_tool.add_normal(normal)
-	surface_tool.add_vertex(top_right)
-
-	if back_face:
-		surface_tool.add_index(vertex_count + 2)
-		surface_tool.add_index(vertex_count + 3)
-		surface_tool.add_index(vertex_count + 1)
-
-		surface_tool.add_index(vertex_count + 1)
-		surface_tool.add_index(vertex_count + 0)
-		surface_tool.add_index(vertex_count + 2)
-	else:
-		surface_tool.add_index(vertex_count + 2)
-		surface_tool.add_index(vertex_count + 0)
-		surface_tool.add_index(vertex_count + 1)
-
-		surface_tool.add_index(vertex_count + 1)
-		surface_tool.add_index(vertex_count + 3)
-		surface_tool.add_index(vertex_count + 2)
-
-	vertex_count += 4
+func update_mesh():
+	surface_tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	
+	for i in range(mesh_data.vertices.size()):
+		surface_tool.add_normal(mesh_data.normals[i])
+		surface_tool.add_uv(mesh_data.uvs[i])
+		surface_tool.add_vertex(mesh_data.vertices[i])
+	
+	for i in range(mesh_data.indices.size()):
+		surface_tool.add_index(mesh_data.indices[i])
+	
+	surface_tool.generate_tangents()
+	mesh = surface_tool.commit()
 
 func get_voxel_face(pos, side):
 	var voxel_face = voxels[pos.x][pos.y][pos.z]
