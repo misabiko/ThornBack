@@ -1,6 +1,7 @@
 extends MeshInstance
 
-var Block = preload("res://Scripts/Block.gd")
+var Block = preload("res://Scenes/Block.tscn")
+var BlockTypes = preload("res://Scripts/Block.gd").BlockTypes
 var material = preload("res://Materials/block_material.tres")
 
 onready var World = $".."
@@ -45,6 +46,9 @@ func _ready():
 				face.transparent = true
 				voxels[i][j][k] = face
 	
+	print("Voxel data dec: ", OS.get_ticks_msec() - last_time)
+	last_time = OS.get_ticks_msec()
+	
 	for x in range(CHUNK_SIZE):
 		for z in range(CHUNK_SIZE):
 			var pos = Vector3(x, 0, z)
@@ -52,15 +56,29 @@ func _ready():
 			newBlock(pos, 1)
 
 			for y in range(pos.y):
-				newBlock(Vector3(pos.x, y, pos.z), 2 if y < 2 else 3)
+				newBlock(Vector3(pos.x, y, pos.z), 2)
+	
+	#voxels[2][0][0].type = 1
+	#voxels[0][2][2].type = 1
+	
+	print("Voxel data init: ", OS.get_ticks_msec() - last_time)
+	last_time = OS.get_ticks_msec()
 	
 	greedy_mesher()
+	
+	print("Meshing: ", OS.get_ticks_msec() - last_time)
+	last_time = OS.get_ticks_msec()
 	
 	surface_tool = SurfaceTool.new()
 	update_mesh()
 	material_override = material
 	
-	print("time: ", OS.get_ticks_msec() - last_time)	
+	print("Mesh creation: ", OS.get_ticks_msec() - last_time)
+	last_time = OS.get_ticks_msec()
+	
+	collision_mesher()	
+	print("Collision meshing: ", OS.get_ticks_msec() - last_time)
+	last_time = OS.get_ticks_msec()
 
 func newBlock(pos, type):
 	#var block = Block.instance()
@@ -194,6 +212,85 @@ func greedy_mesher():
 		back_face = back_face && b
 		b = !b
 
+func collision_mesher():
+	var chunk_size = Vector3(CHUNK_SIZE, WORLD_HEIGHT, CHUNK_SIZE)
+	
+	var voxel_mask = []
+	voxel_mask.resize(CHUNK_SIZE)
+	for i in range(CHUNK_SIZE):
+		voxel_mask[i] = []
+		voxel_mask[i].resize(WORLD_HEIGHT)
+		for j in range(WORLD_HEIGHT):
+			voxel_mask[i][j] = []
+			voxel_mask[i][j].resize(CHUNK_SIZE)
+			for k in range(CHUNK_SIZE):
+				voxel_mask[i][j][k] = false
+	
+	var cube_size
+	for i in range(CHUNK_SIZE):
+		for j in range(WORLD_HEIGHT):
+			for k in range(CHUNK_SIZE):
+				if !voxel_mask[i][j][k] && voxels[i][j][k].type > 0:
+					voxel_mask[i][j][k] = true
+					cube_size = Vector3.ONE
+					
+					var done = false
+					for di in range(1, CHUNK_SIZE - i):
+						if voxel_mask[i + di][j][k] || !voxels[i + di][j][k].equals(voxels[i][j][k]):
+							cube_size.x += di - 1
+							done = true
+							break
+						else:
+							voxel_mask[i + di][j][k] = true
+					
+					if !done:
+						cube_size.x += CHUNK_SIZE - i - 1
+						
+					done = false
+					for dk in range(1, CHUNK_SIZE - k):
+						for di in range(cube_size.x):
+							if voxel_mask[i + di][j][k + dk] || !voxels[i + di][j][k + dk].equals(voxels[i][j][k]):
+								cube_size.z += dk - 1
+								done = true
+								break
+						if done:
+							break
+						else:
+							for di in range(cube_size.x):
+								voxel_mask[i + di][j][k + dk] = true
+					
+					if !done:
+						cube_size.z += CHUNK_SIZE - k - 1
+						
+					done = false
+					for dj in range(1, WORLD_HEIGHT - j):
+						for dk in range(cube_size.z):
+							for di in range(cube_size.x):
+								if voxel_mask[i + di][j + dj][k + dk] || !voxels[i + di][j + dj][k + dk].equals(voxels[i][j][k]):
+									cube_size.y += dj - 1
+									done = true
+									break
+							if done:
+								break
+						if done:
+							break
+						else:
+							for dk in range(cube_size.z):
+								for di in range(cube_size.x):
+									voxel_mask[i + di][j + dj][k + dk] = true
+					
+					if !done:
+						cube_size.y += WORLD_HEIGHT - j - 1
+					
+					var body = StaticBody.new()
+					var coll_shape = CollisionShape.new()
+					coll_shape.translation = Vector3(i, j, k) + cube_size * 0.5
+					var box = BoxShape.new()
+					box.extents = cube_size * 0.5
+					coll_shape.shape = box
+					body.add_child(coll_shape)
+					add_child(body)
+
 func _init(x, z):
 	translation = Vector3(x, 0, z) * CHUNK_SIZE
 	offset = Vector2(x, z)
@@ -201,7 +298,7 @@ func _init(x, z):
 #TODO consider changing param order
 func add_quad(bottom_left, top_left, top_right, bottom_right, voxel, back_face):
 	#TODO add proper key to voxel
-	var uv = Block.BlockTypes.values()[voxel.type - 1].texture
+	var uv = BlockTypes.values()[voxel.type - 1].texture
 
 	var normal
 	match voxel.side:
