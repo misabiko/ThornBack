@@ -8,6 +8,7 @@ const GRAVITY = -9.8
 
 func _process(delta):
 	var move = Vector3()
+	var shift_modifier = 1
 	
 	if Input.is_key_pressed(KEY_W):
 		move -= transform.basis.z
@@ -18,9 +19,14 @@ func _process(delta):
 	if Input.is_key_pressed(KEY_D):
 		move += transform.basis.x
 	
-	move = move.normalized() * WALK_SPEED
-	move.y = FLY_SPEED * (int(Input.is_key_pressed(KEY_SPACE)) - int(Input.is_key_pressed(KEY_R)))
+	if Input.is_key_pressed(KEY_SHIFT):
+		shift_modifier = 3
+	
+	move = move.normalized() * WALK_SPEED * shift_modifier
+	move.y = shift_modifier * FLY_SPEED * (int(Input.is_key_pressed(KEY_SPACE)) - int(Input.is_key_pressed(KEY_R)))
 	move_and_slide(move * delta)
+	
+	$Label.text = "Position: " + str(translation.floor())
 #	vel.x = move.x
 #	vel.z = move.z
 #
