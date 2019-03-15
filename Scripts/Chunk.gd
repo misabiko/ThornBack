@@ -23,6 +23,8 @@ var surface_tool
 
 var static_body
 
+var count = 0
+
 var mesh_data = {
 	"vertices": [],
 	"normals": [],
@@ -71,7 +73,7 @@ func _ready():
 	surface_tool = SurfaceTool.new()
 	update_mesh()
 	material_override = material
-	
+
 	print("Mesh creation: ", OS.get_ticks_msec() - last_time)
 	last_time = OS.get_ticks_msec()
 	
@@ -80,6 +82,8 @@ func _ready():
 	collision_mesher()	
 	print("Collision meshing: ", OS.get_ticks_msec() - last_time)
 	last_time = OS.get_ticks_msec()
+	
+	print("")
 
 func newBlock(pos, type):
 	voxels[pos.x][pos.y][pos.z].type = type
@@ -150,7 +154,7 @@ func greedy_mesher():
 						
 						x[u] += 1
 					x[v] += 1
-				
+
 				x[axis] += 1
 				
 				#Generating the mesh for the mask
