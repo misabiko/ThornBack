@@ -21,6 +21,8 @@ var offset
 var voxels
 var surface_tool
 
+var static_body
+
 var mesh_data = {
 	"vertices": [],
 	"normals": [],
@@ -58,9 +60,6 @@ func _ready():
 			for y in range(pos.y):
 				newBlock(Vector3(pos.x, y, pos.z), 2)
 	
-	#voxels[2][0][0].type = 1
-	#voxels[0][2][2].type = 1
-	
 	print("Voxel data init: ", OS.get_ticks_msec() - last_time)
 	last_time = OS.get_ticks_msec()
 	
@@ -76,14 +75,13 @@ func _ready():
 	print("Mesh creation: ", OS.get_ticks_msec() - last_time)
 	last_time = OS.get_ticks_msec()
 	
+	static_body = StaticBody.new()
+	add_child(static_body)
 	collision_mesher()	
 	print("Collision meshing: ", OS.get_ticks_msec() - last_time)
 	last_time = OS.get_ticks_msec()
 
 func newBlock(pos, type):
-	#var block = Block.instance()
-	#block.translate(pos)
-	#add_child(block)
 	voxels[pos.x][pos.y][pos.z].type = type
 	voxels[pos.x][pos.y][pos.z].transparent = false
 
@@ -282,14 +280,12 @@ func collision_mesher():
 					if !done:
 						cube_size.y += WORLD_HEIGHT - j - 1
 					
-					var body = StaticBody.new()
-					var coll_shape = CollisionShape.new()
-					coll_shape.translation = Vector3(i, j, k) + cube_size * 0.5
 					var box = BoxShape.new()
 					box.extents = cube_size * 0.5
-					coll_shape.shape = box
-					body.add_child(coll_shape)
-					add_child(body)
+					var shape_owner = static_body.create_shape_owner(static_body)
+					
+					static_body.shape_owner_set_transform(shape_owner, Transform.IDENTITY.translated(Vector3(i, j, k) + cube_size * 0.5))
+					static_body.shape_owner_add_shape(shape_owner, box)
 
 func _init(x, z):
 	translation = Vector3(x, 0, z) * CHUNK_SIZE
