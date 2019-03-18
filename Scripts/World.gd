@@ -9,7 +9,7 @@ func _ready():
 	noise.period = 20.0
 	noise.persistence = 0.8
 	
-	var world_radius = 3
+	var world_radius = 1
 	
 	for x in range(-world_radius, world_radius + 1):
 		for y in range(-world_radius, world_radius + 1):

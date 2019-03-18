@@ -23,8 +23,6 @@ var surface_tool
 
 var static_body
 
-var count = 0
-
 var mesh_data = {
 	"vertices": [],
 	"normals": [],
