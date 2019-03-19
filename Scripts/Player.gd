@@ -6,14 +6,17 @@ const FLY_SPEED = 8
 const GRAVITY = -9.8
 
 var screen_center
-const RAY_LENGTH : int = 30
+var RAY_LENGTH : int = 6
+var raycast_exceptions
+export (NodePath) var selection_highlight_nodepath
+onready var selection_highlight = get_node(selection_highlight_nodepath)
 
 #var vel = Vector3()
 var debug_object = {}
 
 func _ready():
 	screen_center = get_viewport().size / 2
-	print("screen_center: ", screen_center)
+	raycast_exceptions = [self]
 
 func _process(delta):
 	process_inputs()
@@ -46,9 +49,11 @@ func process_inputs():
 	
 	move = move.normalized() * WALK_SPEED * shift_modifier
 	move.y = shift_modifier * FLY_SPEED * (int(Input.is_key_pressed(KEY_SPACE)) - int(Input.is_key_pressed(KEY_R)))
-	move_and_slide(move)
 	
-	debug_object["Position"] = translation.floor()
+	if move:
+		move_and_slide(move)
+		
+		debug_object["Position"] = translation.floor()
 
 func update_debug_label(label, object):
 	var debug_text = ""
@@ -60,5 +65,10 @@ func update_debug_label(label, object):
 func _physics_process(delta):
 	var space_state = get_world().direct_space_state
 	var from = $Camera.project_ray_origin(screen_center)
-	var result = space_state.intersect_ray(from, from + $Camera.project_ray_normal(screen_center) * RAY_LENGTH, [self])
-	update_debug_label($RayCastLabel, result)
+	var result = space_state.intersect_ray(from, from + $Camera.project_ray_normal(screen_center) * RAY_LENGTH, raycast_exceptions)
+	
+	if !result.empty():
+		selection_highlight.translation = (result.position - result.normal * 0.2).floor() + Vector3(0.5, 0.5, 0.5)
+		selection_highlight.visible = true
+	else:
+		selection_highlight.visible = false
