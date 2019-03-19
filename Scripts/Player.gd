@@ -14,6 +14,8 @@ onready var selection_highlight = get_node(selection_highlight_nodepath)
 #var vel = Vector3()
 var debug_object = {}
 
+#TODO make selection highlight
+
 func _ready():
 	screen_center = get_viewport().size / 2
 	raycast_exceptions = [self]
