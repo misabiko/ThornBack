@@ -5,7 +5,6 @@
 
 //TODO comment collisionMerger
 //TODO comment greedyMerger
-//TODO clear compiler warnings
 //TODO Add vcvar64 thing to hyper
 
 using namespace godot;
