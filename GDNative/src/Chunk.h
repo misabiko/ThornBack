@@ -8,6 +8,7 @@
 #include <ArrayMesh.hpp>
 #include <OpenSimplexNoise.hpp>
 #include <SurfaceTool.hpp>
+#include <StaticBody.hpp>
 
 namespace godot {
 	class Chunk : public MeshInstance {
@@ -50,6 +51,7 @@ namespace godot {
 		Dictionary blockTypes;
 		Ref<OpenSimplexNoise> noise;
 		SurfaceTool* surfaceTool;
+		StaticBody* staticBody;
 
 		~Chunk();
 
@@ -66,6 +68,8 @@ namespace godot {
 		void updateMesh();
 
 		void addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, VoxelFace* voxel, bool back_face);
+
+		void collisionMesher();
 	};
 }
 

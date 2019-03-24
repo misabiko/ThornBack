@@ -1,6 +1,12 @@
 #include "Chunk.h"
 #include <OS.hpp>
 #include <string>
+#include <BoxShape.hpp>
+
+//TODO comment collisionMerger
+//TODO comment greedyMerger
+//TODO clear compiler warnings
+//TODO Add vcvar64 thing to hyper
 
 using namespace godot;
 
@@ -24,14 +30,16 @@ Chunk::~Chunk() {
 					delete voxels[i][j][k];
 	
 	surfaceTool->free();
+	staticBody->free();
 }
 
 void Chunk::_init() {}
 
 void Chunk::init(int x, int y) {
+	//int64_t lastTime = OS::get_singleton()->get_ticks_msec();
+
 	Vector3 translation = Vector3(x, 0, y) * CHUNK_SIZE;
 	set_translation(translation);
-	long long lastTime = OS::get_singleton()->get_ticks_msec();
 
 	voxels.resize(CHUNK_SIZE);
 
@@ -46,9 +54,6 @@ void Chunk::init(int x, int y) {
 		}
 	}
 
-	Godot::print(("Voxel data dec: " + std::to_string(OS::get_singleton()->get_ticks_msec() - lastTime)).c_str());
-	lastTime = OS::get_singleton()->get_ticks_msec();
-
 	for (int i = 0; i < CHUNK_SIZE; i++)
 		for (int k = 0; k < CHUNK_SIZE; k++) {
 			Vector3 pos = Vector3(i, 0, k);
@@ -58,22 +63,17 @@ void Chunk::init(int x, int y) {
 			for (int j = 0; j < pos.y; j++)
 				newBlock(pos.x, j, pos.z, 2);
 		}
-	
-	Godot::print(("Voxel data init: " + std::to_string(OS::get_singleton()->get_ticks_msec() - lastTime)).c_str());
-	lastTime = OS::get_singleton()->get_ticks_msec();
 
 	greedyMesher();
-	
-	Godot::print(("Chunk: " + std::to_string(OS::get_singleton()->get_ticks_msec() - lastTime)).c_str());
-	lastTime = OS::get_singleton()->get_ticks_msec();
 
 	surfaceTool = SurfaceTool::_new();
 	updateMesh();
-	
-	Godot::print(("Mesh creation: " + std::to_string(OS::get_singleton()->get_ticks_msec() - lastTime)).c_str());
-	lastTime = OS::get_singleton()->get_ticks_msec();
 
-	Godot::print("\n");
+	staticBody = StaticBody::_new();
+	add_child(staticBody);
+	collisionMesher();
+
+	//Godot::print((std::to_string(OS::get_singleton()->get_ticks_msec() - lastTime) + "ms").c_str());
 }
 
 void Chunk::newBlock(const int x, const int y, const int z, int type) {
@@ -249,6 +249,90 @@ void Chunk::updateMesh() {
 	
 	surfaceTool->generate_tangents();
 	set_mesh(surfaceTool->commit());
+}
+
+void Chunk::collisionMesher() {
+	std::vector<std::vector<std::vector<bool>>> voxelMask;
+	voxelMask.resize(CHUNK_SIZE);
+	for (int i = 0; i < CHUNK_SIZE; i++) {
+		voxelMask[i].resize(WORLD_HEIGHT);
+		for (int j = 0; j < WORLD_HEIGHT; j++) {
+			voxelMask[i][j].resize(CHUNK_SIZE);
+			for (int k = 0; k < CHUNK_SIZE; k++)
+				voxelMask[i][j][k] = false;
+		}
+	}
+
+	Vector3 cubeSize;
+	for (int i = 0; i < CHUNK_SIZE; i++)
+		for (int j = 0; j < WORLD_HEIGHT; j++)
+			for (int k = 0; k < CHUNK_SIZE; k++)
+				if (!voxelMask[i][j][k] && voxels[i][j][k]->type) {
+					voxelMask[i][j][k] = true;
+					cubeSize = Vector3(1, 1, 1);
+
+					//TODO break labels
+					bool done = false;
+					for (int di = 1; di < CHUNK_SIZE - i; di++)
+						if (voxelMask[i + di][j][k] || !voxels[i + di][j][k]->equals(voxels[i][j][k])) {
+							cubeSize.x += di - 1;
+							done = true;
+							break;
+						}else
+							voxelMask[i + di][j][k] = true;
+					
+					if (!done)
+						cubeSize.x += CHUNK_SIZE - i - 1;
+
+					done = false;
+					for (int dk = 1; dk < CHUNK_SIZE - k; dk++) {
+						for (int di = 0; di < cubeSize.x; di++)
+							if (voxelMask[i + di][j][k + dk] || !voxels[i + di][j][k + dk]->equals(voxels[i][j][k])) {
+								cubeSize.z += dk - 1;
+								done = true;
+								break;
+							}
+						
+						if (done)
+							break;
+						else
+							for (int di = 0; di < cubeSize.x; di++)
+								voxelMask[i + di][j][k + dk] = true;
+					}
+
+					if (!done)
+						cubeSize.z += CHUNK_SIZE - k - 1;
+
+					done = false;
+					for (int dj = 1; dj < WORLD_HEIGHT - j; dj++) {
+						for (int dk = 0; dk < cubeSize.z; dk++) {
+							for (int di = 0; di < cubeSize.x; di++)
+								if (voxelMask[i + di][j + dj][k + dk] || !voxels[i + di][j + dj][k + dk]->equals(voxels[i][j][k])) {
+									cubeSize.y += dj - 1;
+									done = true;
+									break;
+								}
+							if (done)
+								break;
+						}
+						if (done)
+							break;
+						else
+							for (int dk = 0; dk < cubeSize.z; dk++)
+								for (int di = 0; di < cubeSize.x; di++)
+									voxelMask[i + di][j + dj][k + dk] = true;
+					}
+
+					if (!done)
+						cubeSize.y += WORLD_HEIGHT - j - 1;
+
+					BoxShape* box = BoxShape::_new();
+					box->set_extents(cubeSize * 0.5f);
+					int64_t shapeOwner = staticBody->create_shape_owner(staticBody);
+
+					staticBody->shape_owner_set_transform(shapeOwner, Transform().translated(Vector3(i, j, k) + cubeSize * 0.5f));
+					staticBody->shape_owner_add_shape(shapeOwner, box);
+				}
 }
 
 Chunk::VoxelFace* Chunk::getVoxelFace(const unsigned& x, const unsigned& y, const unsigned& z, Direction side) {
