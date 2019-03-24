@@ -47,10 +47,10 @@ func _ready():
 				face.type = 0
 				face.transparent = true
 				voxels[i][j][k] = face
-	
+
 	print("Voxel data dec: ", OS.get_ticks_msec() - last_time)
 	last_time = OS.get_ticks_msec()
-	
+
 	for x in range(CHUNK_SIZE):
 		for z in range(CHUNK_SIZE):
 			var pos = Vector3(x, 0, z)
@@ -59,7 +59,7 @@ func _ready():
 
 			for y in range(pos.y):
 				newBlock(Vector3(pos.x, y, pos.z), 2)
-	
+
 	print("Voxel data init: ", OS.get_ticks_msec() - last_time)
 	last_time = OS.get_ticks_msec()
 	
