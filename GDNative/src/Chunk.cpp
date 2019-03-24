@@ -30,12 +30,20 @@ Chunk::~Chunk() {
 	
 	surfaceTool->free();
 	staticBody->free();
+
+	for (int i = 0; i < 3; i++)
+		materials[i].unref();
 }
 
 void Chunk::_init() {}
 
 void Chunk::init(int x, int y) {
 	//int64_t lastTime = OS::get_singleton()->get_ticks_msec();
+	{
+		Array blockArray = blockTypes.values();
+		for (int i = 0; i < 3; i++)
+			materials[i] = Ref<Material>(blockArray[i].operator Dictionary()["material"]);
+	}
 
 	Vector3 translation = Vector3(x, 0, y) * CHUNK_SIZE;
 	set_translation(translation);
@@ -166,6 +174,7 @@ void Chunk::greedyMesher() {
 									Vector3(x[0] + du[0],			x[1] + du[1],			x[2] + du[2]),
 									Vector3(x[0] + du[0] + dv[0],	x[1] + du[1] + dv[1],	x[2] + du[2] + dv[2]),
 									Vector3(x[0] + dv[0],			x[1] + dv[1],			x[2] + dv[2]),
+									quad_width, quad_height,
 									mask[n], backFace
 								);
 							}
@@ -186,8 +195,8 @@ void Chunk::greedyMesher() {
 	}
 }
 
-void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, VoxelFace* voxel, bool backFace) {
-	Vector2 uv = blockTypes.values()[voxel->type - 1].operator Dictionary()["texture"].operator Vector2();
+void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, VoxelFace* voxel, bool backFace) {
+	SurfaceData& surface = surfaces[voxel->type - 1];
 
 	Vector3 normal;
 	switch (voxel->side) {
@@ -218,36 +227,45 @@ void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Ve
 		newIndices = {2,0,1, 1,3,2};
 
 	for (const unsigned& i : newIndices)
-		indices.push_back(vertices.size() + i);
+		surface.indices.push_back(surface.vertices.size() + i);
 
-	uvs.push_back(uv);
-	uvs.push_back(uv + Vector2(0.25, 0));
-	uvs.push_back(uv + Vector2(0, 0.5));
-	uvs.push_back(uv + Vector2(0.25, 0.5));
+	surface.uvs.push_back(Vector2(0, 0));
+	surface.uvs.push_back(Vector2(h, 0));
+	surface.uvs.push_back(Vector2(0, w));
+	surface.uvs.push_back(Vector2(h, w));
 
 	for (int i = 0; i < 4; i++)
-		normals.push_back(normal);
+		surface.normals.push_back(normal);
 	
-	vertices.push_back(bottom_left);
-	vertices.push_back(bottom_right);
-	vertices.push_back(top_left);
-	vertices.push_back(top_right);
+	surface.vertices.push_back(bottom_left);
+	surface.vertices.push_back(bottom_right);
+	surface.vertices.push_back(top_left);
+	surface.vertices.push_back(top_right);
 }
 
 void Chunk::updateMesh() {
-	surfaceTool->begin(Mesh::PRIMITIVE_TRIANGLES);
+	for (int i = 0; i < 3; i++)
+		if (surfaces[i].vertices.size()) {
+			surfaceTool->begin(Mesh::PRIMITIVE_TRIANGLES);
 
-	for (int i = 0; i < vertices.size(); i++) {
-		surfaceTool->add_normal(normals[i]);
-		surfaceTool->add_uv(uvs[i]);
-		surfaceTool->add_vertex(vertices[i]);
-	}
+			for (int j = 0; j < surfaces[i].vertices.size(); j++) {
+				surfaceTool->add_normal(surfaces[i].normals[j]);
+				surfaceTool->add_uv(surfaces[i].uvs[j]);
+				surfaceTool->add_vertex(surfaces[i].vertices[j]);
+			}
 
-	for (int i = 0; i < indices.size(); i++)
-		surfaceTool->add_index(indices[i]);
-	
-	surfaceTool->generate_tangents();
-	set_mesh(surfaceTool->commit());
+			for (int j = 0; j < surfaces[i].indices.size(); j++)
+				surfaceTool->add_index(surfaces[i].indices[j]);
+			
+			surfaceTool->generate_tangents();
+
+			surfaceTool->set_material(materials[i]);
+
+			if (get_mesh().is_null())
+				set_mesh(surfaceTool->commit());
+			else
+				surfaceTool->commit(get_mesh());
+		}
 }
 
 void Chunk::collisionMesher() {

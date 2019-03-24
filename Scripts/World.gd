@@ -4,7 +4,6 @@ const Chunk = preload("res://GDNative/bin/Mesher.gdns")
 const ChunkGD = preload("res://Scripts/Chunk.gd")
 var noise = OpenSimplexNoise.new()
 var BlockTypes = preload("res://Scripts/Block.gd").BlockTypes
-var material = preload("res://Materials/block_material.tres")
 
 func _ready():
 	noise.seed = 43
@@ -12,7 +11,7 @@ func _ready():
 	noise.period = 20.0
 	noise.persistence = 0.8
 	
-	var world_radius = 1
+	var world_radius = 5
 	
 	var chunk
 	#var chunkGD
@@ -25,7 +24,6 @@ func _ready():
 			chunk = Chunk.new()
 			chunk.block_types = BlockTypes
 			chunk.noise = noise
-			chunk.material_override = material
 			chunk.init(x, y)
 			add_child(chunk)
 	

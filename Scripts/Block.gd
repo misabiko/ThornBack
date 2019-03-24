@@ -2,12 +2,12 @@ extends StaticBody
 
 const BlockTypes = {
 	"Dirt": {
-		"texture": Vector2(0.5, 0)
+		"material": preload("res://Materials/dirt.tres")
 	},
 	"Cobblestone": {
-		"texture": Vector2(0.75, 0)
+		"material": preload("res://Materials/cobblestone.tres")
 	},
 	"Grass": {
-		"texture": Vector2(0.25, 0)
+		"material": preload("res://Materials/grass.tres")
 	}
 }

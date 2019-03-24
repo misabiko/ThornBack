@@ -9,6 +9,7 @@
 #include <OpenSimplexNoise.hpp>
 #include <SurfaceTool.hpp>
 #include <StaticBody.hpp>
+#include <Material.hpp>
 
 namespace godot {
 	class Chunk : public MeshInstance {
@@ -35,12 +36,18 @@ namespace godot {
 			}
 		};
 
+		struct SurfaceData {
+			std::vector<Vector3> vertices;
+			std::vector<Vector3> normals;
+			std::vector<Vector2> uvs;
+			std::vector<Color> colors;
+			std::vector<unsigned> indices;
+		};
+
 		std::vector<std::vector<std::vector<VoxelFace*>>> voxels;
 
-		std::vector<Vector3> vertices;
-		std::vector<Vector3> normals;
-		std::vector<Vector2> uvs;
-		std::vector<unsigned> indices;
+		Ref<Material> materials[3];
+		SurfaceData surfaces[3];
 
 		VoxelFace* getVoxelFace(const unsigned& x, const unsigned& y, const unsigned& z, Direction side);
 
@@ -67,7 +74,7 @@ namespace godot {
 
 		void updateMesh();
 
-		void addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, VoxelFace* voxel, bool back_face);
+		void addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, VoxelFace* voxel, bool back_face);
 
 		void collisionMesher();
 	};
