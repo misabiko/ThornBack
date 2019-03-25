@@ -30,9 +30,9 @@ Chunk::~Chunk() {
 			for (int k = 0; k < voxels[0][0].size(); k++)
 				if (voxels[i][j][k])
 					delete voxels[i][j][k];
-	
-	surfaceTool->free();
+
 	staticBody->free();
+	surfaceTool->free();
 
 	for (int i = 0; i < 3; i++)
 		materials[i].unref();
@@ -291,7 +291,6 @@ void Chunk::collisionMesher() {
 	{
 		Ref<ArrayMesh> mesh = get_mesh();
 		if (!mesh.is_null()) {
-			Godot::print(("Surface count: " + std::to_string(mesh->get_surface_count())).c_str());
 			for (int i = 0; mesh->get_surface_count(); i++) {	//;)
 				mesh->surface_remove(0);
 				surfaces[i] = SurfaceData();
@@ -379,7 +378,8 @@ void Chunk::collisionMesher() {
 
 					pos = Vector3(i, j, k);
 
-					BoxShape* box = BoxShape::_new();
+					Ref<BoxShape> box;
+					box.instance();
 					box->set_extents(cubeSize * 0.5f);
 					int64_t shapeOwner = staticBody->create_shape_owner(staticBody);
 

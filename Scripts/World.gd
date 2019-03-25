@@ -1,6 +1,6 @@
 extends Node
 
-const Chunk = preload("res://GDNative/bin/Mesher.gdns")
+const Chunk = preload("res://GDNative/bin/Chunk.gdns")
 const ChunkGD = preload("res://Scripts/Chunk.gd")
 var noise = OpenSimplexNoise.new()
 var BlockTypes = preload("res://Scripts/Block.gd").BlockTypes
