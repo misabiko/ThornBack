@@ -13,6 +13,9 @@ void Chunk::_register_methods() {
 	register_method("init", &Chunk::init);
 	register_method("greedy_mesher", &Chunk::greedyMesher);
 	register_method("update_mesh", &Chunk::updateMesh);
+	register_method("_process", &Chunk::_process);
+	register_method("set_block", &Chunk::setBlock);
+	register_method("clear_block", &Chunk::clearBlock);
 
 	register_property<Chunk, Dictionary>("block_types", &Chunk::blockTypes, Dictionary());
 	register_property<Chunk, Ref<OpenSimplexNoise>>("noise", &Chunk::noise, Ref<OpenSimplexNoise>());
@@ -36,6 +39,13 @@ Chunk::~Chunk() {
 }
 
 void Chunk::_init() {}
+
+void Chunk::_process(float delta) {
+	collisionMesher();
+	updateMesh();
+
+	set_process(false);
+}
 
 void Chunk::init(int x, int y) {
 	//int64_t lastTime = OS::get_singleton()->get_ticks_msec();
@@ -65,27 +75,36 @@ void Chunk::init(int x, int y) {
 		for (int k = 0; k < CHUNK_SIZE; k++) {
 			Vector3 pos = Vector3(i, 0, k);
 			pos.y = std::floor((noise->get_noise_2d((pos.x + translation.x) / 5, (pos.z + translation.z) / 5) / 2 + 0.5) * SURFACE_HEIGHT);
-			newBlock(pos.x, pos.y, pos.z, 1);
+			setBlock(pos.x, pos.y, pos.z, 1);
 
 			for (int j = 0; j < pos.y; j++)
-				newBlock(pos.x, j, pos.z, 2);
+				setBlock(pos.x, j, pos.z, 2);
 		}
 
-	greedyMesher();
-
-	surfaceTool = SurfaceTool::_new();
-	updateMesh();
+	//greedyMesher();
 
 	staticBody = StaticBody::_new();
 	add_child(staticBody);
 	collisionMesher();
 
+	surfaceTool = SurfaceTool::_new();
+	updateMesh();
+
 	//Godot::print((std::to_string(OS::get_singleton()->get_ticks_msec() - lastTime) + "ms").c_str());
 }
 
-void Chunk::newBlock(const int x, const int y, const int z, int type) {
+void Chunk::setBlock(const unsigned x, const unsigned y, const unsigned z, const unsigned type) {
 	voxels[x][y][z]->type = type;
 	voxels[x][y][z]->transparent = false;
+
+	set_process(true);
+}
+
+void Chunk::clearBlock(const unsigned x, const unsigned y, const unsigned z) {
+	voxels[x][y][z]->type = 0;
+	voxels[x][y][z]->transparent = true;
+
+	set_process(true);
 }
 
 void Chunk::greedyMesher() {
@@ -175,7 +194,7 @@ void Chunk::greedyMesher() {
 									Vector3(x[0] + du[0] + dv[0],	x[1] + du[1] + dv[1],	x[2] + du[2] + dv[2]),
 									Vector3(x[0] + dv[0],			x[1] + dv[1],			x[2] + dv[2]),
 									quad_width, quad_height,
-									mask[n], backFace
+									mask[n]->type, mask[n]->side
 								);
 							}
 
@@ -195,16 +214,16 @@ void Chunk::greedyMesher() {
 	}
 }
 
-void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, VoxelFace* voxel, bool backFace) {
-	SurfaceData& surface = surfaces[voxel->type - 1];
+void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, unsigned type, Direction side) {
+	SurfaceData& surface = surfaces[type - 1];
 
 	Vector3 normal;
-	switch (voxel->side) {
-		case SOUTH:
-			normal = Vector3(0, 0, 1);
-		break;
+	switch (side) {
 		case NORTH:
 			normal = Vector3(0, 0, -1);
+		break;
+		case SOUTH:
+			normal = Vector3(0, 0, 1);
 		break;
 		case EAST:
 			normal = Vector3(1, 0, 0);
@@ -221,7 +240,7 @@ void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Ve
 	}
 
 	std::array<int, 6> newIndices;
-	if (backFace)
+	if (side % 2)
 		newIndices = {2,3,1, 1,0,2};
 	else
 		newIndices = {2,0,1, 1,3,2};
@@ -230,9 +249,9 @@ void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Ve
 		surface.indices.push_back(surface.vertices.size() + i);
 
 	surface.uvs.push_back(Vector2(0, 0));
-	surface.uvs.push_back(Vector2(h, 0));
-	surface.uvs.push_back(Vector2(0, w));
-	surface.uvs.push_back(Vector2(h, w));
+	surface.uvs.push_back(Vector2(w, 0));
+	surface.uvs.push_back(Vector2(0, h));
+	surface.uvs.push_back(Vector2(w, h));
 
 	for (int i = 0; i < 4; i++)
 		surface.normals.push_back(normal);
@@ -269,6 +288,21 @@ void Chunk::updateMesh() {
 }
 
 void Chunk::collisionMesher() {
+	{
+		Ref<ArrayMesh> mesh = get_mesh();
+		if (!mesh.is_null()) {
+			Godot::print(("Surface count: " + std::to_string(mesh->get_surface_count())).c_str());
+			for (int i = 0; mesh->get_surface_count(); i++) {	//;)
+				mesh->surface_remove(0);
+				surfaces[i] = SurfaceData();
+			}
+		}
+		
+		Array owners = staticBody->get_shape_owners();
+		for (int i = 0; i < owners.size(); i++)
+			staticBody->shape_owner_clear_shapes(owners[i]);
+	}
+
 	std::vector<std::vector<std::vector<bool>>> voxelMask;
 	voxelMask.resize(CHUNK_SIZE);
 	for (int i = 0; i < CHUNK_SIZE; i++) {
@@ -280,7 +314,7 @@ void Chunk::collisionMesher() {
 		}
 	}
 
-	Vector3 cubeSize;
+	Vector3 pos, cubeSize;
 	for (int i = 0; i < CHUNK_SIZE; i++)
 		for (int j = 0; j < WORLD_HEIGHT; j++)
 			for (int k = 0; k < CHUNK_SIZE; k++)
@@ -343,13 +377,73 @@ void Chunk::collisionMesher() {
 					if (!done)
 						cubeSize.y += WORLD_HEIGHT - j - 1;
 
+					pos = Vector3(i, j, k);
+
 					BoxShape* box = BoxShape::_new();
 					box->set_extents(cubeSize * 0.5f);
 					int64_t shapeOwner = staticBody->create_shape_owner(staticBody);
 
-					staticBody->shape_owner_set_transform(shapeOwner, Transform().translated(Vector3(i, j, k) + cubeSize * 0.5f));
+					staticBody->shape_owner_set_transform(shapeOwner, Transform().translated(pos + cubeSize * 0.5f));
 					staticBody->shape_owner_add_shape(shapeOwner, box);
+
+					addCube(pos, cubeSize, voxels[i][j][k]->type);
 				}
+}
+
+void Chunk::addCube(Vector3 origin, Vector3 size, unsigned type) {
+	addQuad(
+		origin + Vector3(0,			0,			size.z),
+		origin + Vector3(0,			size.y,		size.z),
+		origin + Vector3(size.x,	size.y,		size.z),
+		origin + Vector3(size.x,	0,			size.z),
+		size.x, size.y,
+		type, SOUTH
+	);
+	
+	addQuad(
+		origin,
+		origin + Vector3(0,			size.y,		0),
+		origin + Vector3(size.x,	size.y,		0),
+		origin + Vector3(size.x,	0,			0),
+		size.x, size.y,
+		type, NORTH
+	);
+	
+	addQuad(
+		origin,
+		origin + Vector3(0,			size.y,		0),
+		origin + Vector3(0,			size.y,		size.z),
+		origin + Vector3(0,			0,			size.z),
+		size.z, size.y,
+		type, WEST
+	);
+	
+	addQuad(
+		origin + Vector3(size.x,			0,			0),
+		origin + Vector3(size.x,	size.y,		0),
+		origin + Vector3(size.x,	size.y,		size.z),
+		origin + Vector3(size.x,	0,			size.z),
+		size.z, size.y,
+		type, EAST
+	);
+	
+	addQuad(
+		origin,
+		origin + Vector3(0,			0,		size.z),
+		origin + Vector3(size.x,	0,		size.z),
+		origin + Vector3(size.x,	0,			0),
+		size.x, size.z,
+		type, BOTTOM
+	);
+	
+	addQuad(
+		origin + Vector3(0,			size.y,			0),
+		origin + Vector3(0,			size.y,		size.z),
+		origin + Vector3(size.x,	size.y,		size.z),
+		origin + Vector3(size.x,	size.y,			0),
+		size.x, size.z,
+		type, TOP
+	);
 }
 
 Chunk::VoxelFace* Chunk::getVoxelFace(const unsigned& x, const unsigned& y, const unsigned& z, Direction side) {

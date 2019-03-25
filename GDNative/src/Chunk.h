@@ -16,12 +16,12 @@ namespace godot {
 		GODOT_CLASS(Chunk, MeshInstance)
 		private:
 		enum Direction {
-			SOUTH,
-			NORTH,
-			EAST,
-			WEST,
-			TOP,
-			BOTTOM
+			NORTH = 0,
+			SOUTH = 1,
+			EAST = 2,
+			WEST = 3,
+			TOP = 4,
+			BOTTOM = 5
 		};
 
 		struct VoxelFace {
@@ -66,15 +66,21 @@ namespace godot {
 
 		void _init();
 
+		void _process(float delta);
+
 		void init(int x, int y);
 
-		void newBlock(const int x, const int y, const int z, int type);
+		void setBlock(const unsigned x, const unsigned y, const unsigned z, const unsigned type);
+
+		void clearBlock(const unsigned x, const unsigned y, const unsigned z);
 
 		void greedyMesher();
 
 		void updateMesh();
 
-		void addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, VoxelFace* voxel, bool back_face);
+		void addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, unsigned type, Direction side);
+
+		void addCube(Vector3 origin, Vector3 size, unsigned type);
 
 		void collisionMesher();
 	};

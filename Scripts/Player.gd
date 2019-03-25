@@ -10,11 +10,11 @@ var RAY_LENGTH : int = 6
 var raycast_exceptions
 export (NodePath) var selection_highlight_nodepath
 onready var selection_highlight = get_node(selection_highlight_nodepath)
+var aimed_collider
+var selected_normal
 
 #var vel = Vector3()
 var debug_object = {}
-
-#TODO make selection highlight
 
 func _ready():
 	screen_center = get_viewport().size / 2
@@ -72,5 +72,21 @@ func _physics_process(delta):
 	if !result.empty():
 		selection_highlight.translation = (result.position - result.normal * 0.2).floor() + Vector3(0.5, 0.5, 0.5)
 		selection_highlight.visible = true
+		aimed_collider = result.collider
+		selected_normal = (result.normal * 0.8).round().normalized()
 	else:
 		selection_highlight.visible = false
+		aimed_collider = null
+
+func _input(event):
+	if event is InputEventMouseButton and event.is_pressed():
+		match event.button_index:
+			BUTTON_LEFT:
+				if aimed_collider:
+					print(selected_normal)
+					var selectedPos = selection_highlight.translation + selected_normal
+					aimed_collider.get_parent().set_block(selectedPos.x, selectedPos.y, selectedPos.z, 1)
+			BUTTON_RIGHT:
+				if aimed_collider:
+					var selectedPos = selection_highlight.translation
+					aimed_collider.get_parent().clear_block(selectedPos.x, selectedPos.y, selectedPos.z)
