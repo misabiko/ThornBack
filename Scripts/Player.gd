@@ -83,14 +83,12 @@ func _input(event):
 		match event.button_index:
 			BUTTON_LEFT:
 				if aimed_collider:
-					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal)
-					print("Placing ", selectedPos)
-					aimed_collider.get_parent().set_block(int(selectedPos.x) % 16, selectedPos.y, int(selectedPos.z) % 16, 1)
+					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
+					aimed_collider.get_parent().clear_block(selectedPos.x, selectedPos.y, selectedPos.z)
 			BUTTON_RIGHT:
 				if aimed_collider:
-					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
-					print("Removing ", selectedPos)
-					aimed_collider.get_parent().clear_block(int(selectedPos.x) % 16, selectedPos.y, int(selectedPos.z) % 16)
+					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal)
+					aimed_collider.get_parent().set_block(selectedPos.x, selectedPos.y, selectedPos.z, 1)
 
 func world_to_chunk(pos):
 	return Vector3(
