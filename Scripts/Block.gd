@@ -1,4 +1,4 @@
-extends StaticBody
+extends Reference
 
 const BlockTypes = {
 	"Dirt": {
