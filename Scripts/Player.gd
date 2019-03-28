@@ -19,6 +19,8 @@ var debug_object = {}
 func _ready():
 	screen_center = get_viewport().size / 2
 	raycast_exceptions = [self]
+	
+	update_debug()
 
 func _process(delta):
 	process_inputs()
@@ -55,7 +57,7 @@ func process_inputs():
 	if move:
 		move_and_slide(move)
 		
-		debug_object["Position"] = translation.floor()
+		update_debug()
 
 func update_debug_label(label, object):
 	var debug_text = ""
@@ -86,6 +88,8 @@ func _input(event):
 					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
 					aimed_collider.get_parent().clear_block(selectedPos.x, selectedPos.y, selectedPos.z)
 			BUTTON_RIGHT:
+				var chunk = get_chunk_coord()
+				$"../ChunkLoader".on_exit_chunk(chunk.x, chunk.y)
 				if aimed_collider:
 					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal)
 					aimed_collider.get_parent().set_block(selectedPos.x, selectedPos.y, selectedPos.z, 1)
@@ -96,3 +100,10 @@ func world_to_chunk(pos):
 		pos.y,
 		16 + fmod(pos.z, 16) if pos.z < 0 else fmod(pos.z, 16)
 	)
+
+func get_chunk_coord():
+	return Vector2(translation.x / 16, translation.z / 16).floor()
+
+func update_debug():
+	debug_object["Position"] = translation.floor()
+	debug_object["Chunk"] = get_chunk_coord()

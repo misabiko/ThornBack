@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=6 format=2]
 
 [ext_resource path="res://Scripts/World.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Scenes/SelectionHighlight.tscn" type="PackedScene" id=3]
 [ext_resource path="res://crossbar.png" type="Texture" id=4]
+[ext_resource path="res://GDNative/bin/ChunkLoader.gdns" type="Script" id=5]
 
 [node name="World" type="Node"]
 script = ExtResource( 1 )
@@ -23,4 +24,7 @@ transform = Transform( 0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0
 position = Vector2( 512, 300 )
 scale = Vector2( 3, 3 )
 texture = ExtResource( 4 )
+
+[node name="ChunkLoader" type="Node" parent="."]
+script = ExtResource( 5 )
 

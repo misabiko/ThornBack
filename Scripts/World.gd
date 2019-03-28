@@ -12,15 +12,5 @@ func _ready():
 	
 	var world_radius = 2
 	
-	var chunk
-	var startTime = OS.get_ticks_msec()
-	for x in range(-world_radius, world_radius + 1):
-		for y in range(-world_radius, world_radius + 1):
-			print("Generating chunk [", x, ", ", y, "]...")
-			chunk = Chunk.new()
-			chunk.block_types = BlockTypes
-			chunk.noise = noise
-			chunk.init(x, y)
-			add_child(chunk)
-	
-	print("Total time: ", OS.get_ticks_msec() - startTime)
+	$ChunkLoader.block_types = BlockTypes
+	$ChunkLoader.noise = noise
