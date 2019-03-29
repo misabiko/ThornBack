@@ -27,10 +27,10 @@ void ChunkLoader::updateChunkLoadings(const int x, const int y) {
 	Chunk* chunk = chunks[std::pair<int, int>(x, y)];
 
 	if (!chunk)	{
-		Godot::print("trying to start thread!");
 		if (!thread->is_active())
 			thread->start(this, "load_chunk", Vector2(x, y));
-	}
+	}else
+		Godot::print("chunk already existed");
 }
 
 void ChunkLoader::finishLoadChunk() {
@@ -42,9 +42,7 @@ void ChunkLoader::loadChunk(Variant userdata) {
 
 	Chunk* chunk = chunks[std::pair<int, int>(coords.x, coords.y)];
 	chunk = Chunk::_new();
-	chunk->blockTypes = blockTypes;
-	chunk->noise = noise;
-	chunk->init(coords.x, coords.y);
+	chunk->init(coords.x, coords.y, noise, blockTypes);
 	add_child(chunk);
 
 	call_deferred("finish_load_chunk");

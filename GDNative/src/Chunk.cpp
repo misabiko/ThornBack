@@ -47,8 +47,10 @@ void Chunk::_process(float delta) {
 	set_process(false);
 }
 
-void Chunk::init(int x, int y) {
-	//int64_t lastTime = OS::get_singleton()->get_ticks_msec();
+void Chunk::init(int x, int y, Ref<OpenSimplexNoise> noise, Dictionary blockTypes) {
+	this->noise = noise;
+	this->blockTypes = blockTypes;
+
 	{
 		Array blockArray = blockTypes.values();
 		for (int i = 0; i < 3; i++)
@@ -90,7 +92,7 @@ void Chunk::init(int x, int y) {
 	surfaceTool = SurfaceTool::_new();
 	updateMesh();
 
-	//Godot::print((std::to_string(OS::get_singleton()->get_ticks_msec() - lastTime) + "ms").c_str());
+	Godot::print("finished loading chunk");
 }
 
 void Chunk::setBlock(const unsigned x, const unsigned y, const unsigned z, const unsigned type) {

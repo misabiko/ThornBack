@@ -13,12 +13,12 @@ namespace godot {
 		GODOT_CLASS(ChunkLoader, Node)
 		private:
 		Thread* thread;
-
-		public:
-		unsigned radius;
 		Dictionary blockTypes;
 		Ref<OpenSimplexNoise> noise;
-		std::map<std::pair<int, int>, Chunk*> chunks;
+		std::map<std::pair<int, int>, Chunk *> chunks;
+
+	  public:
+		unsigned radius;
 
 		~ChunkLoader();
 

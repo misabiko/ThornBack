@@ -48,6 +48,8 @@ namespace godot {
 
 		Ref<Material> materials[3];
 		SurfaceData surfaces[3];
+		Dictionary blockTypes;
+		Ref<OpenSimplexNoise> noise;
 
 		VoxelFace* getVoxelFace(const unsigned& x, const unsigned& y, const unsigned& z, Direction side);
 
@@ -55,8 +57,6 @@ namespace godot {
 		unsigned short CHUNK_SIZE = 16;
 		unsigned short WORLD_HEIGHT = 128;
 		unsigned short SURFACE_HEIGHT = 60;
-		Dictionary blockTypes;
-		Ref<OpenSimplexNoise> noise;
 		SurfaceTool* surfaceTool;
 		StaticBody* staticBody;
 
@@ -68,7 +68,7 @@ namespace godot {
 
 		void _process(float delta);
 
-		void init(int x, int y);
+		void init(int x, int y, Ref<OpenSimplexNoise> noise, Dictionary blockTypes);
 
 		void setBlock(const unsigned x, const unsigned y, const unsigned z, const unsigned type);
 
