@@ -89,7 +89,7 @@ func _input(event):
 					aimed_collider.get_parent().clear_block(selectedPos.x, selectedPos.y, selectedPos.z)
 			BUTTON_RIGHT:
 				var chunk = get_chunk_coord()
-				$"../ChunkLoader".on_exit_chunk(chunk.x, chunk.y)
+				$"../ChunkLoader".update_chunk_loadings(chunk.x, chunk.y)
 				if aimed_collider:
 					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal)
 					aimed_collider.get_parent().set_block(selectedPos.x, selectedPos.y, selectedPos.z, 1)

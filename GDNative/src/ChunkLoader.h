@@ -6,11 +6,13 @@
 #include <KinematicBody.hpp>
 #include "Chunk.h"
 #include <map>
+#include <Thread.hpp>
 
 namespace godot {
 	class ChunkLoader : public Node {
 		GODOT_CLASS(ChunkLoader, Node)
 		private:
+		Thread* thread;
 
 		public:
 		unsigned radius;
@@ -24,7 +26,11 @@ namespace godot {
 
 		void _init();
 
-		void onExitChunk(const int x, const int y);
+		void updateChunkLoadings(const int x, const int y);
+
+		void finishLoadChunk();
+
+		void loadChunk(Variant userdata);
 	};
 }
 
