@@ -28,3 +28,4 @@ texture = ExtResource( 4 )
 [node name="ChunkLoader" type="Node" parent="."]
 script = ExtResource( 5 )
 
+[connection signal="enter_chunk" from="Player" to="ChunkLoader" method="update_chunk_loadings"]

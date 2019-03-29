@@ -12,12 +12,12 @@ namespace godot {
 	class ChunkLoader : public Node {
 		GODOT_CLASS(ChunkLoader, Node)
 		private:
-		Thread* thread;
+		Ref<Thread> thread;
 		Dictionary blockTypes;
 		Ref<OpenSimplexNoise> noise;
 		std::map<std::pair<int, int>, Chunk *> chunks;
 
-	  public:
+		public:
 		unsigned radius;
 
 		~ChunkLoader();
@@ -26,11 +26,9 @@ namespace godot {
 
 		void _init();
 
-		void updateChunkLoadings(const int x, const int y);
+		void updateChunkLoadings(Vector2 coords);
 
-		void finishLoadChunk();
-
-		Variant loadChunk(Variant userdata);
+		void loadChunk(Variant userdata);
 	};
 }
 

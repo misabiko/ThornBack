@@ -13,6 +13,8 @@ onready var selection_highlight = get_node(selection_highlight_nodepath)
 var aimed_collider
 var selected_normal
 
+signal enter_chunk(coords)
+
 #var vel = Vector3()
 var debug_object = {}
 
@@ -55,8 +57,13 @@ func process_inputs():
 	move.y = shift_modifier * FLY_SPEED * (int(Input.is_key_pressed(KEY_SPACE)) - int(Input.is_key_pressed(KEY_R)))
 	
 	if move:
+		var old_coords = get_chunk_coord()
 		move_and_slide(move)
 		
+		var new_coords = get_chunk_coord()
+		if new_coords != old_coords:
+			emit_signal("enter_chunk", new_coords)
+			
 		update_debug()
 
 func update_debug_label(label, object):
@@ -88,8 +95,6 @@ func _input(event):
 					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
 					aimed_collider.get_parent().clear_block(selectedPos.x, selectedPos.y, selectedPos.z)
 			BUTTON_RIGHT:
-				var chunk = get_chunk_coord()
-				$"../ChunkLoader".update_chunk_loadings(chunk.x, chunk.y)
 				if aimed_collider:
 					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal)
 					aimed_collider.get_parent().set_block(selectedPos.x, selectedPos.y, selectedPos.z, 1)
