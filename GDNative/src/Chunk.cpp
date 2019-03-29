@@ -14,6 +14,7 @@ void Chunk::_register_methods() {
 	register_method("greedy_mesher", &Chunk::greedyMesher);
 	register_method("update_mesh", &Chunk::updateMesh);
 	register_method("_process", &Chunk::_process);
+	register_method("_ready", &Chunk::_ready);
 	register_method("set_block", &Chunk::setBlock);
 	register_method("clear_block", &Chunk::clearBlock);
 
@@ -40,6 +41,14 @@ Chunk::~Chunk() {
 
 void Chunk::_init() {}
 
+void Chunk::_ready() {
+	Array owners = staticBody->get_shape_owners();
+	for (int i = 0; i < owners.size(); i++)
+		staticBody->shape_owner_set_disabled(owners[i], false);
+
+	set_visible(true);
+}
+
 void Chunk::_process(float delta) {
 	collisionMesher();
 	updateMesh();
@@ -50,6 +59,9 @@ void Chunk::_process(float delta) {
 void Chunk::init(int x, int y, Ref<OpenSimplexNoise> noise, Dictionary blockTypes) {
 	this->noise = noise;
 	this->blockTypes = blockTypes;
+	coords = std::pair<int, int>(x, y);
+
+	set_visible(false);
 
 	{
 		Array blockArray = blockTypes.values();
@@ -83,16 +95,12 @@ void Chunk::init(int x, int y, Ref<OpenSimplexNoise> noise, Dictionary blockType
 				setBlock(pos.x, j, pos.z, 2);
 		}
 
-	//greedyMesher();
-
 	staticBody = StaticBody::_new();
 	add_child(staticBody);
 	collisionMesher();
 
 	surfaceTool = SurfaceTool::_new();
 	updateMesh();
-
-	Godot::print("finished loading chunk");
 }
 
 void Chunk::setBlock(const unsigned x, const unsigned y, const unsigned z, const unsigned type) {
@@ -385,6 +393,7 @@ void Chunk::collisionMesher() {
 					box->set_extents(cubeSize * 0.5f);
 					int64_t shapeOwner = staticBody->create_shape_owner(staticBody);
 
+					staticBody->shape_owner_set_disabled(shapeOwner, true);
 					staticBody->shape_owner_set_transform(shapeOwner, Transform().translated(pos + cubeSize * 0.5f));
 					staticBody->shape_owner_add_shape(shapeOwner, box);
 

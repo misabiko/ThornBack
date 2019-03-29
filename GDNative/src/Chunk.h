@@ -48,6 +48,7 @@ namespace godot {
 
 		Ref<Material> materials[3];
 		SurfaceData surfaces[3];
+		std::pair<int, int> coords;
 		Dictionary blockTypes;
 		Ref<OpenSimplexNoise> noise;
 
@@ -65,6 +66,8 @@ namespace godot {
 		static void _register_methods();
 
 		void _init();
+
+		void _ready();
 
 		void _process(float delta);
 

@@ -30,7 +30,7 @@ namespace godot {
 
 		void finishLoadChunk();
 
-		void loadChunk(Variant userdata);
+		Variant loadChunk(Variant userdata);
 	};
 }
 
