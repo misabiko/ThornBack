@@ -17,6 +17,7 @@ void ChunkLoader::_register_methods() {
 }
 
 ChunkLoader::~ChunkLoader() {
+	Godot::print("bap");
 	for (auto& kv : chunks)
 		delete kv.second;
 

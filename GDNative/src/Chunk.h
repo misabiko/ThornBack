@@ -77,8 +77,6 @@ namespace godot {
 
 		void clearBlock(const unsigned x, const unsigned y, const unsigned z);
 
-		void greedyMesher();
-
 		void updateMesh();
 
 		void addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, unsigned type, Direction side);

@@ -11,7 +11,6 @@ using namespace godot;
 
 void Chunk::_register_methods() {
 	register_method("init", &Chunk::init);
-	register_method("greedy_mesher", &Chunk::greedyMesher);
 	register_method("update_mesh", &Chunk::updateMesh);
 	register_method("_process", &Chunk::_process);
 	register_method("_ready", &Chunk::_ready);
@@ -26,6 +25,7 @@ void Chunk::_register_methods() {
 }
 
 Chunk::~Chunk() {
+	Godot::print("boop");
 	for (int i = 0; i < voxels.size(); i++)
 		for (int j = 0; j < voxels[0].size(); j++)
 			for (int k = 0; k < voxels[0][0].size(); k++)
@@ -115,113 +115,6 @@ void Chunk::clearBlock(const unsigned x, const unsigned y, const unsigned z) {
 	voxels[x][y][z]->transparent = true;
 
 	set_process(true);
-}
-
-void Chunk::greedyMesher() {
-	int n;
-	Direction side;
-	int quad_width, quad_height;
-
-	std::array<short, 3> x;
-	std::array<short, 3> q;
-	std::array<short, 3> chunk_size{CHUNK_SIZE, WORLD_HEIGHT, CHUNK_SIZE};
-	std::array<short, 3> du;
-	std::array<short, 3> dv;
-
-	std::vector<VoxelFace*> mask = std::vector<VoxelFace*>(CHUNK_SIZE * WORLD_HEIGHT);
-
-	VoxelFace* voxel_face1 = nullptr;
-	VoxelFace* voxel_face2 = nullptr;
-
-	for (bool backFace = true, b = false; b != backFace; backFace = backFace && b, b = !b) {
-		for (int axis = 0; axis < 3; axis++) {
-			int u = (axis + 1) % 3;
-			int v = (axis + 2) % 3;
-
-			x.fill(0);
-			q.fill(0);
-			q[axis] = 1;
-
-			switch (axis) {
-				case 0:
-					side = backFace ? WEST : EAST;
-					break;
-				case 1:
-					side = backFace ? BOTTOM : TOP;
-					break;
-				case 2:
-					side = backFace ? SOUTH : NORTH;
-					break;
-			}
-
-			for (x[axis] = -1; x[axis] < chunk_size[axis];) {
-				n = 0;
-
-				for (x[v] = 0; x[v] < chunk_size[v]; x[v]++) {
-					for (x[u] = 0; x[u] < chunk_size[u]; x[u]++) {
-						voxel_face1 = x[axis] >= 0 ? getVoxelFace(x[0], x[1], x[2], side) : nullptr;
-						voxel_face2 = x[axis] < chunk_size[axis] - 1 ? getVoxelFace(x[0] + q[0], x[1] + q[1], x[2] + q[2], side) : nullptr;
-
-						mask[n] = (voxel_face1 != nullptr && voxel_face2 != nullptr && voxel_face1->equals(voxel_face2)) ? nullptr : (backFace ? voxel_face2 : voxel_face1);
-						n++;
-					}
-				}
-
-				x[axis]++;
-
-				n = 0;
-
-				for (int j = 0; j < chunk_size[v]; j++)
-					for (int i = 0; i < chunk_size[u];) {
-						if (mask[n] != nullptr) {
-							for (quad_width = 1; i + quad_width < chunk_size[u] && mask[n + quad_width] != nullptr && mask[n + quad_width]->equals(mask[n]); quad_width++);
-
-							bool done = false;
-							for (quad_height = 1; j + quad_height < chunk_size[v]; quad_height++) {
-								for (int k = 0; k < quad_width; k++)
-									if (mask[n + k + quad_height * chunk_size[u]] == nullptr || !mask[n + k + quad_height * chunk_size[u]]->equals(mask[n])) {
-										done = true;
-										break;
-									}
-								
-								if (done)
-									break;
-							}
-
-							if (!mask[n]->transparent) {
-								x[u] = i;
-								x[v] = j;
-
-								du.fill(0);
-								du[u] = quad_width;
-
-								dv.fill(0);
-								dv[v] = quad_height;
-
-								addQuad(
-									Vector3(x[0],					x[1],					x[2]),
-									Vector3(x[0] + du[0],			x[1] + du[1],			x[2] + du[2]),
-									Vector3(x[0] + du[0] + dv[0],	x[1] + du[1] + dv[1],	x[2] + du[2] + dv[2]),
-									Vector3(x[0] + dv[0],			x[1] + dv[1],			x[2] + dv[2]),
-									quad_width, quad_height,
-									mask[n]->type, mask[n]->side
-								);
-							}
-
-							for (int l = 0; l < quad_height; l++)
-								for (int k = 0; k < quad_width; k++)
-									mask[n + k + l * chunk_size[u]] = nullptr;
-							
-							i += quad_width;
-							n += quad_width;
-						}else {
-							i++;
-							n++;
-						}
-					}
-			}
-		}
-	}
 }
 
 void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, unsigned type, Direction side) {
