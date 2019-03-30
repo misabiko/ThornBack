@@ -15,7 +15,56 @@ var textures = [
 ]
 
 func _ready():
-	material_override.albedo_color = Color(1, 1, 1, 0.25)
+	var surfaceTool = SurfaceTool.new()
+	surfaceTool.begin(Mesh.PRIMITIVE_LINES)
+	surfaceTool.add_color(Color.black)
+	surfaceTool.add_vertex(Vector3(-0.501, 0.501, -0.501))
+	surfaceTool.add_vertex(Vector3(0.501, 0.501, -0.501))
+	surfaceTool.add_vertex(Vector3(0.501, 0.501, 0.501))
+	surfaceTool.add_vertex(Vector3(-0.501, 0.501, 0.501))
+	
+	surfaceTool.add_vertex(Vector3(-0.501, -0.501, -0.501))
+	surfaceTool.add_vertex(Vector3(0.501, -0.501, -0.501))
+	surfaceTool.add_vertex(Vector3(0.501, -0.501, 0.501))
+	surfaceTool.add_vertex(Vector3(-0.501, -0.501, 0.501))
+	
+	surfaceTool.add_index(0)
+	surfaceTool.add_index(1)
+	
+	surfaceTool.add_index(1)
+	surfaceTool.add_index(2)
+	
+	surfaceTool.add_index(2)
+	surfaceTool.add_index(3)
+	
+	surfaceTool.add_index(3)
+	surfaceTool.add_index(0)
+	###
+	surfaceTool.add_index(4)
+	surfaceTool.add_index(5)
+	
+	surfaceTool.add_index(5)
+	surfaceTool.add_index(6)
+	
+	surfaceTool.add_index(6)
+	surfaceTool.add_index(7)
+	
+	surfaceTool.add_index(7)
+	surfaceTool.add_index(4)
+	###
+	surfaceTool.add_index(0)
+	surfaceTool.add_index(4)
+	
+	surfaceTool.add_index(1)
+	surfaceTool.add_index(5)
+	
+	surfaceTool.add_index(2)
+	surfaceTool.add_index(6)
+	
+	surfaceTool.add_index(3)
+	surfaceTool.add_index(7)
+	$MeshInstance.mesh = surfaceTool.commit()
+	material_override.albedo_color = Color(1, 1, 1, 0)
 
 func _on_Player_start_breaking():
 	breaking_stage = 0
@@ -29,4 +78,4 @@ func _on_Player_step_breaking():
 func _on_Player_stop_breaking():
 	breaking_stage = 0
 	material_override.albedo_texture = null
-	material_override.albedo_color = Color(1, 1, 1, 0.25)
+	material_override.albedo_color = Color(1, 1, 1, 0)
