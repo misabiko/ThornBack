@@ -23,6 +23,7 @@ signal stop_breaking
 
 var vel = Vector3()
 var debug_object = {}
+var flying : bool = false
 
 func _ready():
 	screen_center = get_viewport().size / 2
@@ -34,7 +35,10 @@ func _process(delta):
 	update_debug_label($DebugLabel, debug_object)
 
 func _physics_process(delta):
-	process_inputs(delta)
+	if flying:
+		process_inputs_flying()
+	else:
+		process_inputs(delta)
 	
 	if update_selection_highlight():
 		stop_breaking()
@@ -75,7 +79,7 @@ func process_inputs(delta):
 			
 		update_debug()
 
-func process_inputs_flying(delta):
+func process_inputs_flying():
 	var move = Vector3()
 	var shift_modifier = 1
 	
@@ -92,20 +96,11 @@ func process_inputs_flying(delta):
 		shift_modifier = 3
 	
 	move = move.normalized() * WALK_SPEED * shift_modifier
-	
-	vel.x = move.x
-	vel.z = move.z
-
-	if Input.is_key_pressed(KEY_SPACE) && vel.y == 0:
-		vel.y += JUMP_FORCE
-
-	vel.y += GRAVITY * delta
-
+	move.y = shift_modifier * FLY_SPEED * (int(Input.is_key_pressed(KEY_SPACE)) - int(Input.is_key_pressed(KEY_R)))
 	
 	if move:
 		var old_coords = get_chunk_coord()
 		move_and_slide(move)
-		vel = move_and_slide(move.normalized() * WALK_SPEED * delta + vel)
 		
 		var new_coords = get_chunk_coord()
 		if new_coords != old_coords:
@@ -137,13 +132,18 @@ func _input(event):
 			match event.button_index:
 				BUTTON_LEFT:
 					stop_breaking()
-	elif event is InputEventKey and event.scancode == KEY_SHIFT:
-		var fov = $Camera.fov
-		if event.is_pressed():
-			$CamZoom.interpolate_property($Camera, "fov", fov, 85, 0.5 * ((85 - fov) / 15), Tween.TRANS_EXPO, Tween.EASE_OUT)
-		else:
-			$CamZoom.interpolate_property($Camera, "fov", fov, 70, 0.5 * ((fov - 70) / 15), Tween.TRANS_EXPO, Tween.EASE_OUT)
-		$CamZoom.start()
+	elif event is InputEventKey:
+		match event.scancode:
+			KEY_SHIFT:
+				var fov = $Camera.fov
+				if event.is_pressed():
+					$CamZoom.interpolate_property($Camera, "fov", fov, 85, 0.5 * ((85 - fov) / 15), Tween.TRANS_EXPO, Tween.EASE_OUT)
+				else:
+					$CamZoom.interpolate_property($Camera, "fov", fov, 70, 0.5 * ((fov - 70) / 15), Tween.TRANS_EXPO, Tween.EASE_OUT)
+				$CamZoom.start()
+			KEY_F:
+				if event.is_pressed():
+					flying = !flying
 
 func world_to_chunk(pos):
 	return Vector3(
@@ -160,6 +160,7 @@ func update_debug():
 	debug_object["Chunk"] = get_chunk_coord()
 	debug_object["is_on_floor"] = is_on_floor()
 	debug_object["breaking_stage"] = breaking_stage
+	debug_object["flying"] = flying
 
 #Returns true if selected block changed or none is selected
 func update_selection_highlight():
