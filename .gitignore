@@ -2,7 +2,6 @@
 export.cfg
 export_presets.cfg
 
-newstart_textures/
 .vscode/
 GDNative/bin/*
 GDNative/godot-cpp/bin/*

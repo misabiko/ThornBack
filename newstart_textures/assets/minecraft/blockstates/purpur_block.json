@@ -1,0 +1,6 @@
+{
+    "variants": {
+        "normal": [{ "model": "purpur_block" },
+		  { "model": "purpur_block_2" }]
+    }
+}
