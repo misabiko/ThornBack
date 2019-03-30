@@ -101,9 +101,9 @@ func _input(event):
 
 func world_to_chunk(pos):
 	return Vector3(
-		16 + fmod(pos.x, 16) if pos.x < 0 else fmod(pos.x, 16),
+		0 if fmod(pos.x, 16) == 0 else (16 + fmod(pos.x, 16) if pos.x < 0 else fmod(pos.x, 16)),
 		pos.y,
-		16 + fmod(pos.z, 16) if pos.z < 0 else fmod(pos.z, 16)
+		0 if fmod(pos.z, 16) == 0 else (16 + fmod(pos.z, 16) if pos.z < 0 else fmod(pos.z, 16))
 	)
 
 func get_chunk_coord():
