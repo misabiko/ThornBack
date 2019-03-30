@@ -74,27 +74,18 @@ func update_debug_label(label, object):
 	label.text = debug_text
 
 func _physics_process(delta):
-	var space_state = get_world().direct_space_state
-	var from = $Camera.project_ray_origin(screen_center)
-	var result = space_state.intersect_ray(from, from + $Camera.project_ray_normal(screen_center) * RAY_LENGTH, raycast_exceptions)
-	
-	if !result.empty():
-		selection_highlight.translation = (result.position - result.normal * 0.2).floor() + Vector3(0.5, 0.5, 0.5)
-		selection_highlight.visible = true
-		aimed_collider = result.collider
-		selected_normal = (result.normal * 0.8).round().normalized()
-	else:
-		selection_highlight.visible = false
-		aimed_collider = null
+	update_selection_highlight()
 
 func _input(event):
 	if event is InputEventMouseButton and event.is_pressed():
 		match event.button_index:
 			BUTTON_LEFT:
+				update_selection_highlight()
 				if aimed_collider:
 					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
 					aimed_collider.get_parent().clear_block(selectedPos.x, selectedPos.y, selectedPos.z)
 			BUTTON_RIGHT:
+				update_selection_highlight()
 				if aimed_collider:
 					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal)
 					aimed_collider.get_parent().set_block(selectedPos.x, selectedPos.y, selectedPos.z, 1)
@@ -112,3 +103,17 @@ func get_chunk_coord():
 func update_debug():
 	debug_object["Position"] = translation.floor()
 	debug_object["Chunk"] = get_chunk_coord()
+
+func update_selection_highlight():
+	var space_state = get_world().direct_space_state
+	var from = $Camera.project_ray_origin(screen_center)
+	var result = space_state.intersect_ray(from, from + $Camera.project_ray_normal(screen_center) * RAY_LENGTH, raycast_exceptions)
+	
+	if !result.empty():
+		selection_highlight.translation = (result.position - result.normal * 0.2).floor() + Vector3(0.5, 0.5, 0.5)
+		selection_highlight.visible = true
+		aimed_collider = result.collider
+		selected_normal = (result.normal * 0.8).round().normalized()
+	else:
+		selection_highlight.visible = false
+		aimed_collider = null
