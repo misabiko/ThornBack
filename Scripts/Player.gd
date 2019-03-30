@@ -137,6 +137,13 @@ func _input(event):
 			match event.button_index:
 				BUTTON_LEFT:
 					stop_breaking()
+	elif event is InputEventKey and event.scancode == KEY_SHIFT:
+		var fov = $Camera.fov
+		if event.is_pressed():
+			$CamZoom.interpolate_property($Camera, "fov", fov, 85, 0.5 * ((85 - fov) / 15), Tween.TRANS_EXPO, Tween.EASE_OUT)
+		else:
+			$CamZoom.interpolate_property($Camera, "fov", fov, 70, 0.5 * ((fov - 70) / 15), Tween.TRANS_EXPO, Tween.EASE_OUT)
+		$CamZoom.start()
 
 func world_to_chunk(pos):
 	return Vector3(
