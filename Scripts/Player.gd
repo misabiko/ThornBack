@@ -137,9 +137,15 @@ func _input(event):
 			KEY_SHIFT:
 				var fov = $Camera.fov
 				if event.is_pressed():
-					$CamZoom.interpolate_property($Camera, "fov", fov, 85, 0.5 * ((85 - fov) / 15), Tween.TRANS_EXPO, Tween.EASE_OUT)
+					if fov < 85:
+						$CamZoom.interpolate_property($Camera, "fov", fov, 85, 0.5 * ((85 - fov) / 15), Tween.TRANS_EXPO, Tween.EASE_OUT)
+					else:
+						$Camera.fov = 85
 				else:
-					$CamZoom.interpolate_property($Camera, "fov", fov, 70, 0.5 * ((fov - 70) / 15), Tween.TRANS_EXPO, Tween.EASE_OUT)
+					if fov > 70:
+						$CamZoom.interpolate_property($Camera, "fov", fov, 70, 0.75 * ((fov - 70) / 15), Tween.TRANS_EXPO, Tween.EASE_OUT)
+					else:
+						$Camera.fov = 70
 				$CamZoom.start()
 			KEY_F:
 				if event.is_pressed():
