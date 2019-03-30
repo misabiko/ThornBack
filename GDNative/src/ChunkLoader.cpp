@@ -46,6 +46,7 @@ void ChunkLoader::_process(float delta) {
 }
 
 void ChunkLoader::updateChunkLoadings(Vector2 coords) {
+	mutex->lock();
 	loadingBacklog.clear();
 	
 	for (int x = coords.x - radius; x < coords.x + radius; x++)
@@ -56,7 +57,9 @@ void ChunkLoader::updateChunkLoadings(Vector2 coords) {
 			)
 				loadingBacklog.emplace_back(x, y);
 	
-	loadingBacklog.sort(loadingComp);
+	if (!loadingBacklog.empty())
+		loadingBacklog.sort(loadingComp);
+	mutex->unlock();
 }
 
 void ChunkLoader::loadChunk(Variant userdata) {

@@ -58,7 +58,7 @@ namespace godot {
 		unsigned short CHUNK_SIZE = 16;
 		unsigned short WORLD_HEIGHT = 128;
 		unsigned short SURFACE_HEIGHT = 60;
-		SurfaceTool* surfaceTool;
+		Ref<SurfaceTool> surfaceTool;
 		StaticBody* staticBody;
 
 		~Chunk();

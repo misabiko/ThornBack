@@ -32,8 +32,8 @@ Chunk::~Chunk() {
 				if (voxels[i][j][k])
 					delete voxels[i][j][k];
 
+	surfaceTool.unref();
 	staticBody->free();
-	surfaceTool->free();
 
 	for (int i = 0; i < 3; i++)
 		materials[i].unref();
@@ -99,7 +99,7 @@ void Chunk::init(int x, int y, Ref<OpenSimplexNoise> noise, Dictionary blockType
 	add_child(staticBody);
 	collisionMesher();
 
-	surfaceTool = SurfaceTool::_new();
+	surfaceTool.instance();
 	updateMesh();
 }
 
