@@ -13,7 +13,13 @@ onready var selection_highlight = get_node(selection_highlight_nodepath)
 var aimed_collider
 var selected_normal
 
+var breaking : bool = false
+var breaking_stage : int = 0
+
 signal enter_chunk(coords)
+signal start_breaking
+signal step_breaking
+signal stop_breaking
 
 var vel = Vector3()
 var debug_object = {}
@@ -29,7 +35,9 @@ func _process(delta):
 
 func _physics_process(delta):
 	process_inputs(delta)
-	update_selection_highlight()
+	
+	if update_selection_highlight():
+		stop_breaking()
 
 func process_inputs(delta):
 	var move = Vector3()
@@ -113,18 +121,22 @@ func update_debug_label(label, object):
 	label.text = debug_text
 
 func _input(event):
-	if event is InputEventMouseButton and event.is_pressed():
-		match event.button_index:
-			BUTTON_LEFT:
-				update_selection_highlight()
-				if aimed_collider:
-					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
-					aimed_collider.get_parent().clear_block(selectedPos.x, selectedPos.y, selectedPos.z)
-			BUTTON_RIGHT:
-				update_selection_highlight()
-				if aimed_collider:
-					var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal)
-					aimed_collider.get_parent().set_block(selectedPos.x, selectedPos.y, selectedPos.z, 1)
+	if event is InputEventMouseButton:
+		if event.is_pressed():
+			match event.button_index:
+				BUTTON_LEFT:
+					update_selection_highlight()
+					if aimed_collider:
+						start_breaking()
+				BUTTON_RIGHT:
+					update_selection_highlight()
+					if aimed_collider:
+						var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal)
+						aimed_collider.get_parent().set_block(selectedPos.x, selectedPos.y, selectedPos.z, 1)
+		else:
+			match event.button_index:
+				BUTTON_LEFT:
+					stop_breaking()
 
 func world_to_chunk(pos):
 	return Vector3(
@@ -140,9 +152,11 @@ func update_debug():
 	debug_object["Position"] = translation.floor()
 	debug_object["Chunk"] = get_chunk_coord()
 	debug_object["is_on_floor"] = is_on_floor()
-	debug_object["WALK_SPEED"] = WALK_SPEED
+	debug_object["breaking_stage"] = breaking_stage
 
+#Returns true if selected block changed or none is selected
 func update_selection_highlight():
+	var old_translation = selection_highlight.translation
 	var space_state = get_world().direct_space_state
 	var from = $Camera.project_ray_origin(screen_center)
 	var result = space_state.intersect_ray(from, from + $Camera.project_ray_normal(screen_center) * RAY_LENGTH, raycast_exceptions)
@@ -155,3 +169,26 @@ func update_selection_highlight():
 	else:
 		selection_highlight.visible = false
 		aimed_collider = null
+	
+	return aimed_collider == null or old_translation != selection_highlight.translation
+
+func _on_BreakTimer_timeout():
+	if breaking_stage == 9:
+		var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
+		aimed_collider.get_parent().clear_block(selectedPos.x, selectedPos.y, selectedPos.z)
+		stop_breaking()
+	else:
+		breaking_stage += 1
+		emit_signal("step_breaking")
+
+func start_breaking():
+	$BreakTimer.start()
+	emit_signal("start_breaking")
+	breaking = true
+
+func stop_breaking():
+	if breaking:
+		$BreakTimer.stop()
+		emit_signal("stop_breaking")
+		breaking = false
+		breaking_stage = 0

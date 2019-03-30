@@ -30,3 +30,7 @@ margin_top = 10.0
 margin_right = -10.0
 margin_bottom = -10.0
 
+[node name="BreakTimer" type="Timer" parent="."]
+wait_time = 0.1
+
+[connection signal="timeout" from="BreakTimer" to="." method="_on_BreakTimer_timeout"]

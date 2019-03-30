@@ -29,3 +29,6 @@ texture = ExtResource( 4 )
 script = ExtResource( 5 )
 
 [connection signal="enter_chunk" from="Player" to="ChunkLoader" method="update_chunk_loadings"]
+[connection signal="start_breaking" from="Player" to="SelectionHighlight" method="_on_Player_start_breaking"]
+[connection signal="step_breaking" from="Player" to="SelectionHighlight" method="_on_Player_step_breaking"]
+[connection signal="stop_breaking" from="Player" to="SelectionHighlight" method="_on_Player_stop_breaking"]
