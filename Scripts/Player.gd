@@ -1,9 +1,9 @@
 extends KinematicBody
 
-const WALK_SPEED = 10
-const JUMP_FORCE = 10
+const WALK_SPEED = 5
+const JUMP_FORCE = 8
 const FLY_SPEED = 8
-const GRAVITY = -9.8
+const GRAVITY = -30
 
 var screen_center
 var RAY_LENGTH : int = 6
@@ -15,7 +15,7 @@ var selected_normal
 
 signal enter_chunk(coords)
 
-#var vel = Vector3()
+var vel = Vector3()
 var debug_object = {}
 
 func _ready():
@@ -25,19 +25,49 @@ func _ready():
 	update_debug()
 
 func _process(delta):
-	process_inputs()
 	update_debug_label($DebugLabel, debug_object)
-#	vel.x = move.x
-#	vel.z = move.z
-#
-#	if Input.is_key_pressed(KEY_SPACE) && vel.y == 0:
-#		vel.y += JUMP_FORCE
-#
-#	vel.y += GRAVITY * delta
-#
-#	vel = move_and_slide(move.normalized() * WALK_SPEED * delta + vel)
 
-func process_inputs():
+func _physics_process(delta):
+	process_inputs(delta)
+	update_selection_highlight()
+
+func process_inputs(delta):
+	var move = Vector3()
+	var shift_modifier = 1
+	
+	if Input.is_key_pressed(KEY_W):
+		move -= transform.basis.z
+	if Input.is_key_pressed(KEY_S):
+		move += transform.basis.z
+	if Input.is_key_pressed(KEY_A):
+		move -= transform.basis.x
+	if Input.is_key_pressed(KEY_D):
+		move += transform.basis.x
+	
+	if Input.is_key_pressed(KEY_SHIFT):
+		shift_modifier = 1.5
+	
+	move = move.normalized() * WALK_SPEED * shift_modifier
+	
+	vel.x = move.x
+	vel.z = move.z
+
+	if Input.is_key_pressed(KEY_SPACE) && is_on_floor() && vel.y <= 0:
+		vel.y += JUMP_FORCE
+	else:
+		vel.y += GRAVITY * delta
+
+	if vel:
+		var old_coords = get_chunk_coord()
+		vel = move_and_slide(vel, Vector3.UP)
+		
+		var new_coords = get_chunk_coord()
+		if new_coords != old_coords:
+			emit_signal("enter_chunk", new_coords)
+			
+		update_debug()
+
+func process_inputs_flying(delta):
 	var move = Vector3()
 	var shift_modifier = 1
 	
@@ -54,11 +84,20 @@ func process_inputs():
 		shift_modifier = 3
 	
 	move = move.normalized() * WALK_SPEED * shift_modifier
-	move.y = shift_modifier * FLY_SPEED * (int(Input.is_key_pressed(KEY_SPACE)) - int(Input.is_key_pressed(KEY_R)))
+	
+	vel.x = move.x
+	vel.z = move.z
+
+	if Input.is_key_pressed(KEY_SPACE) && vel.y == 0:
+		vel.y += JUMP_FORCE
+
+	vel.y += GRAVITY * delta
+
 	
 	if move:
 		var old_coords = get_chunk_coord()
 		move_and_slide(move)
+		vel = move_and_slide(move.normalized() * WALK_SPEED * delta + vel)
 		
 		var new_coords = get_chunk_coord()
 		if new_coords != old_coords:
@@ -72,9 +111,6 @@ func update_debug_label(label, object):
 		debug_text += key + ": " + str(object[key]) + "\n"
 	
 	label.text = debug_text
-
-func _physics_process(delta):
-	update_selection_highlight()
 
 func _input(event):
 	if event is InputEventMouseButton and event.is_pressed():
@@ -103,6 +139,8 @@ func get_chunk_coord():
 func update_debug():
 	debug_object["Position"] = translation.floor()
 	debug_object["Chunk"] = get_chunk_coord()
+	debug_object["is_on_floor"] = is_on_floor()
+	debug_object["WALK_SPEED"] = WALK_SPEED
 
 func update_selection_highlight():
 	var space_state = get_world().direct_space_state

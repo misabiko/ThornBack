@@ -10,7 +10,7 @@
 script = ExtResource( 1 )
 
 [node name="Player" parent="." instance=ExtResource( 2 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 40, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 60, 0 )
 selection_highlight_nodepath = NodePath("../SelectionHighlight")
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]

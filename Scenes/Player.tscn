@@ -8,6 +8,8 @@ radius = 0.4
 height = 1.9
 
 [node name="Player" type="KinematicBody"]
+input_ray_pickable = false
+collision/safe_margin = 0.005
 script = ExtResource( 1 )
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
