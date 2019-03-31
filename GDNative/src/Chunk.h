@@ -46,10 +46,9 @@ namespace godot {
 
 		std::vector<std::vector<std::vector<VoxelFace*>>> voxels;
 
-		Ref<Material> materials[3];
 		SurfaceData surfaces[3];
 		std::pair<int, int> coords;
-		Dictionary blockTypes;
+		Array blockTypes;
 		Ref<OpenSimplexNoise> noise;
 
 		VoxelFace* getVoxelFace(const unsigned& x, const unsigned& y, const unsigned& z, Direction side);
@@ -71,7 +70,7 @@ namespace godot {
 
 		void _process(float delta);
 
-		void init(int x, int y, Ref<OpenSimplexNoise> noise, Dictionary blockTypes);
+		void init(int x, int y, Ref<OpenSimplexNoise> noise, Array blockTypes);
 
 		void setBlock(const unsigned x, const unsigned y, const unsigned z, const unsigned type);
 

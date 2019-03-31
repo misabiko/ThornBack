@@ -1,6 +1,8 @@
 #include "ChunkLoader.h"
 #include <cmath>
 #include <OS.hpp>
+#include <string>
+#include <Resource.hpp>
 
 using namespace godot;
 
@@ -10,7 +12,7 @@ void ChunkLoader::_register_methods() {
 	register_method("_ready", &ChunkLoader::_ready);
 	register_method("_process", &ChunkLoader::_process);
 
-	register_property<ChunkLoader, Dictionary>("block_types", &ChunkLoader::blockTypes, Dictionary());
+	register_property<ChunkLoader, Array>("block_types", &ChunkLoader::blockTypes, Array());
 	register_property<ChunkLoader, Ref<OpenSimplexNoise>>("noise", &ChunkLoader::noise, Ref<OpenSimplexNoise>());
 	register_property<ChunkLoader, unsigned>("radius", &ChunkLoader::setRadius, &ChunkLoader::getRadius, 8);
 	register_property<ChunkLoader, unsigned>("delay", &ChunkLoader::delay, 100);
@@ -18,18 +20,13 @@ void ChunkLoader::_register_methods() {
 
 ChunkLoader::~ChunkLoader() {
 	Godot::print("bap");
-	for (auto& kv : chunks)
-		delete kv.second;
-
-	if (thread->is_active())
-		thread->wait_to_finish();
-	thread.unref();
 }
 
 void ChunkLoader::_init() {
 	thread.instance();
 	mutex.instance();
-	radius = 8;
+	
+	radius = 1;
 	delay = 100;
 	radiusSquared = 2 * radius * radius;
 	loadingComp = [](const std::pair<int, int>& a, const std::pair<int, int>& b) {

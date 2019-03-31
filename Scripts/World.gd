@@ -1,8 +1,17 @@
 extends Node
 
-const Chunk = preload("res://GDNative/bin/Chunk.gdns")
 var noise = OpenSimplexNoise.new()
-var BlockTypes = preload("res://Scripts/Block.gd").BlockTypes
+var BlockTypes = [{
+		"name": "Dirt",
+		"material": preload("res://Materials/dirt.tres")
+	}, {
+		"name": "Cobblestone",
+		"material": preload("res://Materials/cobblestone.tres")
+	}, {
+		"name": "Grass",
+		"material": preload("res://Materials/grass.tres")
+	}
+]
 
 func _ready():
 	noise.seed = 43
@@ -10,7 +19,9 @@ func _ready():
 	noise.period = 20.0
 	noise.persistence = 0.8
 	
-	var world_radius = 2
-	
 	$ChunkLoader.block_types = BlockTypes
 	$ChunkLoader.noise = noise
+
+func _exit_tree():
+	for type in BlockTypes:
+		type.material.unreference()

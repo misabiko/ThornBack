@@ -17,9 +17,9 @@ namespace godot {
 		private:
 		Ref<Thread> thread;
 		Ref<Mutex> mutex;
-		Dictionary blockTypes;
+		Array blockTypes;
 		Ref<OpenSimplexNoise> noise;
-		std::map<std::pair<int, int>, Chunk *> chunks;
+		std::map<std::pair<int, int>, Chunk*> chunks;
 		std::list<std::pair<int, int>> loadingBacklog;
 		std::function<bool(std::pair<int, int>, std::pair<int, int>)> loadingComp;
 		unsigned radiusSquared;

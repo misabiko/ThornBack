@@ -17,26 +17,17 @@ void Chunk::_register_methods() {
 	register_method("set_block", &Chunk::setBlock);
 	register_method("clear_block", &Chunk::clearBlock);
 
-	register_property<Chunk, Dictionary>("block_types", &Chunk::blockTypes, Dictionary());
-	register_property<Chunk, Ref<OpenSimplexNoise>>("noise", &Chunk::noise, Ref<OpenSimplexNoise>());
 	register_property<Chunk, unsigned short>("CHUNK_SIZE", &Chunk::CHUNK_SIZE, 16);
 	register_property<Chunk, unsigned short>("WORLD_HEIGHT", &Chunk::WORLD_HEIGHT, 128);
 	register_property<Chunk, unsigned short>("SURFACE_HEIGHT", &Chunk::SURFACE_HEIGHT, 60);
 }
 
 Chunk::~Chunk() {
-	Godot::print("boop");
 	for (int i = 0; i < voxels.size(); i++)
 		for (int j = 0; j < voxels[0].size(); j++)
 			for (int k = 0; k < voxels[0][0].size(); k++)
 				if (voxels[i][j][k])
 					delete voxels[i][j][k];
-
-	surfaceTool.unref();
-	staticBody->free();
-
-	for (int i = 0; i < 3; i++)
-		materials[i].unref();
 }
 
 void Chunk::_init() {}
@@ -56,18 +47,12 @@ void Chunk::_process(float delta) {
 	set_process(false);
 }
 
-void Chunk::init(int x, int y, Ref<OpenSimplexNoise> noise, Dictionary blockTypes) {
+void Chunk::init(int x, int y, Ref<OpenSimplexNoise> noise, Array blockTypes) {
 	this->noise = noise;
 	this->blockTypes = blockTypes;
 	coords = std::pair<int, int>(x, y);
 
 	set_visible(false);
-
-	{
-		Array blockArray = blockTypes.values();
-		for (int i = 0; i < 3; i++)
-			materials[i] = Ref<Material>(blockArray[i].operator Dictionary()["material"]);
-	}
 
 	Vector3 translation = Vector3(x, 0, y) * CHUNK_SIZE;
 	set_translation(translation);
@@ -166,7 +151,7 @@ void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Ve
 }
 
 void Chunk::updateMesh() {
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < blockTypes.size(); i++)
 		if (surfaces[i].vertices.size()) {
 			surfaceTool->begin(Mesh::PRIMITIVE_TRIANGLES);
 
@@ -181,7 +166,7 @@ void Chunk::updateMesh() {
 			
 			surfaceTool->generate_tangents();
 
-			surfaceTool->set_material(materials[i]);
+			surfaceTool->set_material(((Dictionary)blockTypes[i])["material"]);
 
 			if (get_mesh().is_null())
 				set_mesh(surfaceTool->commit());

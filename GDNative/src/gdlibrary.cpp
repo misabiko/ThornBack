@@ -1,3 +1,4 @@
+#include <Godot.hpp>
 #include "Chunk.h"
 #include "ChunkLoader.h"
 
