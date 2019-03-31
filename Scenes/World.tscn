@@ -22,7 +22,7 @@ transform = Transform( 0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0
 
 [node name="crossbar" type="Sprite" parent="CanvasLayer"]
 position = Vector2( 512, 300 )
-scale = Vector2( 3, 3 )
+scale = Vector2( 2, 2 )
 texture = ExtResource( 4 )
 
 [node name="ChunkLoader" type="Node" parent="."]
