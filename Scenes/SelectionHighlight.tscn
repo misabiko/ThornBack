@@ -12,11 +12,8 @@ size = Vector3( 1.001, 1.001, 1.001 )
 [sub_resource type="SpatialMaterial" id=3]
 flags_transparent = true
 flags_unshaded = true
-flags_use_point_size = true
 flags_do_not_receive_shadows = true
 flags_disable_ambient_light = true
-params_line_width = 10.0
-params_point_size = 10.0
 albedo_color = Color( 0, 0, 0, 0.784314 )
 
 [node name="SelectionHighlight" type="MeshInstance"]

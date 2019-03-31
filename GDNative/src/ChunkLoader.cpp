@@ -18,10 +18,6 @@ void ChunkLoader::_register_methods() {
 	register_property<ChunkLoader, unsigned>("delay", &ChunkLoader::delay, 100);
 }
 
-ChunkLoader::~ChunkLoader() {
-	Godot::print("bap");
-}
-
 void ChunkLoader::_init() {
 	thread.instance();
 	mutex.instance();

@@ -28,8 +28,6 @@ namespace godot {
 		public:
 		unsigned radius;
 
-		~ChunkLoader();
-
 		static void _register_methods();
 
 		void _init();

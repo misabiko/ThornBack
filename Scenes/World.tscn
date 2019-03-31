@@ -27,6 +27,7 @@ texture = ExtResource( 4 )
 
 [node name="ChunkLoader" type="Node" parent="."]
 script = ExtResource( 5 )
+
 [connection signal="enter_chunk" from="Player" to="ChunkLoader" method="update_chunk_loadings"]
 [connection signal="start_breaking" from="Player" to="SelectionHighlight" method="_on_Player_start_breaking"]
 [connection signal="step_breaking" from="Player" to="SelectionHighlight" method="_on_Player_step_breaking"]
