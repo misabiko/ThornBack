@@ -29,10 +29,16 @@ func _ready():
 	screen_center = get_viewport().size / 2
 	raycast_exceptions = [self]
 	
-	update_debug()
+	print("path: ", get_path())
+	
+	$DebugHelper.add_method("Position", "debug_get_pos", get_path())
+	$DebugHelper.add_method("Chunk", "get_chunk_coord", get_path())
+	$DebugHelper.add_method("is_on_floor", "is_on_floor", get_path())
+	$DebugHelper.add_property("breaking_stage", get_path())
+	$DebugHelper.add_property("flying", get_path())
 
-func _process(delta):
-	update_debug_label($DebugLabel, debug_object)
+func debug_get_pos():
+	return translation.floor()
 
 func _physics_process(delta):
 	if flying:
@@ -76,8 +82,6 @@ func process_inputs(delta):
 		var new_coords = get_chunk_coord()
 		if new_coords != old_coords:
 			emit_signal("enter_chunk", new_coords)
-			
-		update_debug()
 
 func process_inputs_flying():
 	var move = Vector3()
@@ -105,15 +109,6 @@ func process_inputs_flying():
 		var new_coords = get_chunk_coord()
 		if new_coords != old_coords:
 			emit_signal("enter_chunk", new_coords)
-			
-		update_debug()
-
-func update_debug_label(label, object):
-	var debug_text = ""
-	for key in object:
-		debug_text += key + ": " + str(object[key]) + "\n"
-	
-	label.text = debug_text
 
 func _input(event):
 	if event is InputEventMouseButton:
@@ -160,13 +155,6 @@ func world_to_chunk(pos):
 
 func get_chunk_coord():
 	return Vector2(translation.x / 16, translation.z / 16).floor()
-
-func update_debug():
-	debug_object["Position"] = translation.floor()
-	debug_object["Chunk"] = get_chunk_coord()
-	debug_object["is_on_floor"] = is_on_floor()
-	debug_object["breaking_stage"] = breaking_stage
-	debug_object["flying"] = flying
 
 #Returns true if selected block changed or none is selected
 func update_selection_highlight():
