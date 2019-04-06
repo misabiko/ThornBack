@@ -22,14 +22,11 @@ signal step_breaking
 signal stop_breaking
 
 var vel = Vector3()
-var debug_object = {}
-var flying : bool = false
+var flying : bool = true
 
 func _ready():
 	screen_center = get_viewport().size / 2
 	raycast_exceptions = [self]
-	
-	print("path: ", get_path())
 	
 	$DebugHelper.add_method("Position", "debug_get_pos", get_path())
 	$DebugHelper.add_method("Chunk", "get_chunk_coord", get_path())

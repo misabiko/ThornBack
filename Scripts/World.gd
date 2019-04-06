@@ -21,6 +21,10 @@ func _ready():
 	
 	$ChunkLoader.block_types = BlockTypes
 	$ChunkLoader.noise = noise
+	$ChunkLoader.init()
+	
+	$Player/DebugHelper.add_property("delay", $ChunkLoader.get_path())
+	$Player/DebugHelper.add_method("Chunks to load", "get_backlog_size", $ChunkLoader.get_path())0
 
 func _exit_tree():
 	for type in BlockTypes:
