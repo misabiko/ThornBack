@@ -85,6 +85,9 @@ env.Append(LIBS=[cpp_library])
 env.Append(CPPPATH=['src/'])
 sources = Glob('src/*.cpp')
 
+env['PDB'] = env['target_name'] + '.pdb'
+env['CCPDBFLAGS'] = '/Zi /Fd${TARGET}.pdb'
+
 library = env.SharedLibrary(target=env['target_path'] + env['target_name'] , source=sources)
 
 Default(library)

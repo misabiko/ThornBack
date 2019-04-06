@@ -8,3 +8,4 @@ GDNative/bin/*
 GDNative/godot-cpp/bin/*
 GDNative/.sconsign.dblite
 *.obj
+*.pdb
