@@ -1,5 +1,5 @@
-#ifndef MESHER_H
-#define MESHER_H
+#ifndef CHUNK_H
+#define CHUNK_H
 
 #include <Godot.hpp>
 #include <MeshInstance.hpp>
@@ -10,6 +10,7 @@
 #include <SurfaceTool.hpp>
 #include <StaticBody.hpp>
 #include <Material.hpp>
+#include "ChunkData.h"
 
 namespace godot {
 	class Chunk : public MeshInstance {
@@ -24,18 +25,6 @@ namespace godot {
 			BOTTOM = 5
 		};
 
-		struct VoxelFace {
-			bool transparent;
-			unsigned type;
-			Direction side;
-
-			VoxelFace() : transparent(true), type(0), side(SOUTH) {}
-
-			bool equals(VoxelFace* other) {
-				return other->transparent == transparent && other->type == type;
-			}
-		};
-
 		struct SurfaceData {
 			std::vector<Vector3> vertices;
 			std::vector<Vector3> normals;
@@ -44,23 +33,15 @@ namespace godot {
 			std::vector<unsigned> indices;
 		};
 
-		std::vector<std::vector<std::vector<VoxelFace*>>> voxels;
-
 		SurfaceData surfaces[3];
 		std::pair<int, int> coords;
 		Array blockTypes;
 		Ref<OpenSimplexNoise> noise;
 
-		VoxelFace* getVoxelFace(const unsigned& x, const unsigned& y, const unsigned& z, Direction side);
-
 		public:
-		unsigned short CHUNK_SIZE = 16;
-		unsigned short WORLD_HEIGHT = 128;
-		unsigned short SURFACE_HEIGHT = 60;
+		Ref<ChunkData> chunkData;
 		Ref<SurfaceTool> surfaceTool;
 		StaticBody* staticBody;
-
-		~Chunk();
 
 		static void _register_methods();
 
