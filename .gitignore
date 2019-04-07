@@ -4,8 +4,7 @@ export_presets.cfg
 
 newstart_textures/
 .vscode/
-GDNative/bin/*
-GDNative/godot-cpp/bin/*
-GDNative/.sconsign.dblite
-*.obj
+Project/GDNative/bin/*
+Project/GDNative/.sconsign.dblite
 *.pdb
+*.obj
