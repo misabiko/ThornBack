@@ -208,7 +208,7 @@ void Chunk::collisionMesher() {
 					Ref<BoxShape> box;
 					box.instance();
 					box->set_extents(cubeSize * 0.5f);
-					int64_t shapeOwner = staticBody->create_shape_owner(this);
+					int64_t shapeOwner = staticBody->create_shape_owner(staticBody);
 
 					staticBody->shape_owner_set_disabled(shapeOwner, true);
 					staticBody->shape_owner_set_transform(shapeOwner, Transform().translated(pos + cubeSize * 0.5f));
