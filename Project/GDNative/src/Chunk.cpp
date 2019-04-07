@@ -2,10 +2,7 @@
 #include <OS.hpp>
 #include <string>
 #include <BoxShape.hpp>
-
-//TODO comment collisionMerger
-//TODO comment greedyMerger
-//TODO Add vcvar64 thing to hyper
+#include <MainLoop.hpp>
 
 using namespace godot;
 
@@ -16,13 +13,9 @@ void Chunk::_register_methods() {
 	register_method("_ready", &Chunk::_ready);
 	register_method("set_block", &Chunk::setBlock);
 	register_method("clear_block", &Chunk::clearBlock);
-
-	register_property<Chunk, Ref<ChunkData>>("chunk_data", &Chunk::chunkData, Ref<ChunkData>());
 }
 
-void Chunk::_init() {
-	chunkData.instance();
-}
+void Chunk::_init() {}
 
 void Chunk::_ready() {
 	Array owners = staticBody->get_shape_owners();
@@ -30,6 +23,7 @@ void Chunk::_ready() {
 		staticBody->shape_owner_set_disabled(owners[i], false);
 
 	set_visible(true);
+	set_process(false);
 }
 
 void Chunk::_process(float delta) {
@@ -39,25 +33,17 @@ void Chunk::_process(float delta) {
 	set_process(false);
 }
 
-void Chunk::init(int x, int y, Ref<OpenSimplexNoise> noise, Array blockTypes) {
-	this->noise = noise;
+void Chunk::init(int x, int y, Ref<WorldData> worldData, Array blockTypes) {
 	this->blockTypes = blockTypes;
+	this->worldData = worldData;
+
 	coords = std::pair<int, int>(x, y);
+	worldData->tryInit(coords);
 
 	set_visible(false);
 
 	Vector3 translation = Vector3(x, 0, y) * CHUNK_SIZE;
 	set_translation(translation);
-
-	for (int i = 0; i < CHUNK_SIZE; i++)
-		for (int k = 0; k < CHUNK_SIZE; k++) {
-			Vector3 pos = Vector3(i, 0, k);
-			pos.y = std::floor((noise->get_noise_2d((pos.x + translation.x) / 5, (pos.z + translation.z) / 5) / 2 + 0.5) * 60);
-			setBlock(pos.x, pos.y, pos.z, 1);
-
-			for (int j = 0; j < pos.y; j++)
-				setBlock(pos.x, j, pos.z, 2);
-		}
 
 	staticBody = StaticBody::_new();
 	add_child(staticBody);
@@ -68,15 +54,13 @@ void Chunk::init(int x, int y, Ref<OpenSimplexNoise> noise, Array blockTypes) {
 }
 
 void Chunk::setBlock(const unsigned x, const unsigned y, const unsigned z, const unsigned type) {
-	chunkData->getBlock(x, y, z)->type = type;
-	chunkData->getBlock(x, y, z)->rendered = false;
+	worldData->getBlock(coords, x, y, z)->set(type, true);
 
 	set_process(true);
 }
 
 void Chunk::clearBlock(const unsigned x, const unsigned y, const unsigned z) {
-	chunkData->getBlock(x, y, z)->type = 0;
-	chunkData->getBlock(x, y, z)->rendered = true;
+	worldData->getBlock(coords, x, y, z)->set(0, false);
 
 	set_process(true);
 }
@@ -175,77 +159,62 @@ void Chunk::collisionMesher() {
 	for (int i = 0; i < CHUNK_SIZE; i++)
 		for (int j = 0; j < WORLD_HEIGHT; j++)
 			for (int k = 0; k < CHUNK_SIZE; k++)
-				if (!voxelMask[i][j][k] && chunkData->getBlock(i, j, k)->type) {
+				if (!voxelMask[i][j][k] && worldData->getBlock(coords, i, j, k)->type) {
 					voxelMask[i][j][k] = true;
 					cubeSize = Vector3(1, 1, 1);
 
-					//TODO break labels
-					bool done = false;
 					for (int di = 1; di < CHUNK_SIZE - i; di++)
-						if (voxelMask[i + di][j][k] || !chunkData->getBlock(i + di, j, k)->equals(chunkData->getBlock(i, j, k))) {
+						if (voxelMask[i + di][j][k] || !worldData->getBlock(coords, i + di, j, k)->equals(worldData->getBlock(coords, i, j, k))) {
 							cubeSize.x += di - 1;
-							done = true;
-							break;
+							goto fullbreak1;
 						}else
 							voxelMask[i + di][j][k] = true;
 					
-					if (!done)
-						cubeSize.x += CHUNK_SIZE - i - 1;
+					cubeSize.x += CHUNK_SIZE - i - 1;	//This is skipped if goto fullbreak1
+					fullbreak1:
 
-					done = false;
 					for (int dk = 1; dk < CHUNK_SIZE - k; dk++) {
 						for (int di = 0; di < cubeSize.x; di++)
-							if (voxelMask[i + di][j][k + dk] || !chunkData->getBlock(i + di, j, k + dk)->equals(chunkData->getBlock(i, j, k))) {
+							if (voxelMask[i + di][j][k + dk] || !worldData->getBlock(coords, i + di, j, k + dk)->equals(worldData->getBlock(coords, i, j, k))) {
 								cubeSize.z += dk - 1;
-								done = true;
-								break;
+								goto fullbreak2;
 							}
 						
-						if (done)
-							break;
-						else
-							for (int di = 0; di < cubeSize.x; di++)
-								voxelMask[i + di][j][k + dk] = true;
+						for (int di = 0; di < cubeSize.x; di++)
+							voxelMask[i + di][j][k + dk] = true;
 					}
 
-					if (!done)
-						cubeSize.z += CHUNK_SIZE - k - 1;
+					cubeSize.z += CHUNK_SIZE - k - 1;	//This is skipped if goto fullbreak2
+					fullbreak2:
 
-					done = false;
 					for (int dj = 1; dj < WORLD_HEIGHT - j; dj++) {
-						for (int dk = 0; dk < cubeSize.z; dk++) {
+						for (int dk = 0; dk < cubeSize.z; dk++)
 							for (int di = 0; di < cubeSize.x; di++)
-								if (voxelMask[i + di][j + dj][k + dk] || !chunkData->getBlock(i + di, j + dj, k + dk)->equals(chunkData->getBlock(i, j, k))) {
+								if (voxelMask[i + di][j + dj][k + dk] || !worldData->getBlock(coords, i + di, j + dj, k + dk)->equals(worldData->getBlock(coords, i, j, k))) {
 									cubeSize.y += dj - 1;
-									done = true;
-									break;
+									goto fullbreak3;
 								}
-							if (done)
-								break;
-						}
-						if (done)
-							break;
-						else
-							for (int dk = 0; dk < cubeSize.z; dk++)
-								for (int di = 0; di < cubeSize.x; di++)
-									voxelMask[i + di][j + dj][k + dk] = true;
+						
+						for (int dk = 0; dk < cubeSize.z; dk++)
+							for (int di = 0; di < cubeSize.x; di++)
+								voxelMask[i + di][j + dj][k + dk] = true;
 					}
 
-					if (!done)
-						cubeSize.y += WORLD_HEIGHT - j - 1;
+					cubeSize.y += WORLD_HEIGHT - j - 1;	//This is skipped if goto fullbreak3
+					fullbreak3:
 
 					pos = Vector3(i, j, k);
 
 					Ref<BoxShape> box;
 					box.instance();
 					box->set_extents(cubeSize * 0.5f);
-					int64_t shapeOwner = staticBody->create_shape_owner(staticBody);
+					int64_t shapeOwner = staticBody->create_shape_owner(this);
 
 					staticBody->shape_owner_set_disabled(shapeOwner, true);
 					staticBody->shape_owner_set_transform(shapeOwner, Transform().translated(pos + cubeSize * 0.5f));
 					staticBody->shape_owner_add_shape(shapeOwner, box);
 
-					addCube(pos, cubeSize, chunkData->getBlock(i, j, k)->type);
+					addCube(pos, cubeSize, worldData->getBlock(coords, i, j, k)->type);
 				}
 }
 
@@ -278,7 +247,7 @@ void Chunk::addCube(Vector3 origin, Vector3 size, unsigned type) {
 	);
 	
 	addQuad(
-		origin + Vector3(size.x,			0,			0),
+		origin + Vector3(size.x,	0,			0),
 		origin + Vector3(size.x,	size.y,		0),
 		origin + Vector3(size.x,	size.y,		size.z),
 		origin + Vector3(size.x,	0,			size.z),

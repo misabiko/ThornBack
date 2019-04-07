@@ -3,6 +3,7 @@
 #include <OS.hpp>
 #include <string>
 #include <Resource.hpp>
+#include <MainLoop.hpp>
 
 using namespace godot;
 
@@ -12,9 +13,9 @@ void ChunkLoader::_register_methods() {
 	register_method("_process", &ChunkLoader::_process);
 	register_method("init", &ChunkLoader::init);
 	register_method("get_backlog_size", &ChunkLoader::getBacklogSize);
+	register_method("_notification", &ChunkLoader::_notification);
 
 	register_property<ChunkLoader, Array>("block_types", &ChunkLoader::blockTypes, Array());
-	register_property<ChunkLoader, Ref<OpenSimplexNoise>>("noise", &ChunkLoader::noise, Ref<OpenSimplexNoise>());
 	register_property<ChunkLoader, int>("radius", &ChunkLoader::setRadius, &ChunkLoader::getRadius, 8);
 	register_property<ChunkLoader, int>("delay", &ChunkLoader::delay, 100);
 }
@@ -22,11 +23,15 @@ void ChunkLoader::_register_methods() {
 ChunkLoader::~ChunkLoader() {
 	if (thread->is_active())
 		thread->wait_to_finish();
+
+	worldData->unreference();
+	worldData->free();
 }
 
 void ChunkLoader::_init() {
 	thread.instance();
 	mutex.instance();
+	worldData = WorldData::_new();
 	
 	delay = 100;
 	radius = 8;
@@ -34,16 +39,17 @@ void ChunkLoader::_init() {
 	loadingComp = [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
 		return a.first * a.first + a.second * a.second < b.first * b.first + b.second * b.second;
 	};
+	quitRequested = false;
 }
 
 void ChunkLoader::init() {
-	float backlogSize = 256;
+	float backlogSize = 64;
 	float numLoaded = 0;
 
-	for (int x = -8; x < 8; x++) {
-		for (int y = -8; y < 8; y++)	{
+	for (int x = -4; x < 4; x++) {
+		for (int y = -4; y < 4; y++)	{
 			Chunk* chunk = Chunk::_new();
-			chunk->init(x, y, noise, blockTypes);
+			chunk->init(x, y, worldData, blockTypes);
 			add_child(chunk);
 			chunks.emplace(std::pair<int, int>(x, y), chunk);
 			numLoaded++;
@@ -75,8 +81,7 @@ void ChunkLoader::updateChunkLoadings(Vector2 coords) {
 	
 	if (!loadingBacklog.empty())
 		loadingBacklog.sort(loadingComp);
-
-	loadingBacklog.emplace_back(coords.x, coords.y);
+	
 	mutex->unlock();
 }
 
@@ -84,20 +89,22 @@ void ChunkLoader::loadChunk(Variant userdata) {
 	mutex->lock();
 	bool hasBacklog = !loadingBacklog.empty();
 
-	while (hasBacklog) {
+	while (hasBacklog && !quitRequested) {
 		std::pair<int, int> coords = loadingBacklog.front();
 		loadingBacklog.pop_front();
 		mutex->unlock();
 
 		Chunk *chunk = Chunk::_new();
-		chunk->init(coords.first, coords.second, noise, blockTypes);
+		chunk->init(coords.first, coords.second, worldData, blockTypes);
 		call_deferred("add_child", chunk);
 		chunks.emplace(coords, chunk);
 
 		mutex->lock();
+
 		if (hasBacklog = !loadingBacklog.empty())
 			OS::get_singleton()->delay_msec(std::min<int>((std::pow(loadingBacklog.front().first - lastCoords.first, 2) + std::pow(loadingBacklog.front().second - lastCoords.second, 2)) * 10, 500));
 	}
+	
 	mutex->unlock();
 
 	thread->call_deferred("wait_to_finish");
@@ -114,4 +121,9 @@ int ChunkLoader::getRadius() {
 
 int ChunkLoader::getBacklogSize() {
 	return loadingBacklog.size();
+}
+
+void ChunkLoader::_notification(const int what) {
+	if (what == MainLoop::NOTIFICATION_WM_QUIT_REQUEST)
+		quitRequested = true;
 }

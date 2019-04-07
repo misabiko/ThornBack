@@ -1,4 +1,4 @@
-[submodule "GDNative/godot-cpp"]
-	path = GDNative/godot-cpp
+[submodule "godot-cpp"]
+	path = godot-cpp
 	url = https://github.com/GodotNativeTools/godot-cpp
 	ignore = dirty

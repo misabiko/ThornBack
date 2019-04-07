@@ -4,7 +4,7 @@
 [ext_resource path="res://Scenes/Player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Scenes/SelectionHighlight.tscn" type="PackedScene" id=3]
 [ext_resource path="res://crossbar.png" type="Texture" id=4]
-[ext_resource path="res://GDNative/bin/ChunkLoader.gdns" type="Script" id=5]
+[ext_resource path="res://Scripts/ChunkLoader.gdns" type="Script" id=5]
 
 [node name="World" type="Node"]
 script = ExtResource( 1 )

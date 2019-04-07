@@ -10,12 +10,12 @@
 #include <SurfaceTool.hpp>
 #include <StaticBody.hpp>
 #include <Material.hpp>
-#include "ChunkData.h"
+#include "WorldData.h"
 
 namespace godot {
 	class Chunk : public MeshInstance {
 		GODOT_CLASS(Chunk, MeshInstance)
-		private:
+		
 		enum Direction {
 			NORTH = 0,
 			SOUTH = 1,
@@ -36,10 +36,9 @@ namespace godot {
 		SurfaceData surfaces[3];
 		std::pair<int, int> coords;
 		Array blockTypes;
-		Ref<OpenSimplexNoise> noise;
 
 		public:
-		Ref<ChunkData> chunkData;
+		Ref<WorldData> worldData;
 		Ref<SurfaceTool> surfaceTool;
 		StaticBody* staticBody;
 
@@ -51,7 +50,7 @@ namespace godot {
 
 		void _process(float delta);
 
-		void init(int x, int y, Ref<OpenSimplexNoise> noise, Array blockTypes);
+		void init(int x, int y, Ref<WorldData> worldData, Array blockTypes);
 
 		void setBlock(const unsigned x, const unsigned y, const unsigned z, const unsigned type);
 
