@@ -43,11 +43,11 @@ void ChunkLoader::_init() {
 }
 
 void ChunkLoader::init() {
-	float backlogSize = 64;
+	float backlogSize = 256;
 	float numLoaded = 0;
 
-	for (int x = -4; x < 4; x++) {
-		for (int y = -4; y < 4; y++)	{
+	for (int x = -8; x < 8; x++) {
+		for (int y = -8; y < 8; y++)	{
 			Chunk* chunk = Chunk::_new();
 			chunk->init(x, y, worldData, blockTypes);
 			add_child(chunk);

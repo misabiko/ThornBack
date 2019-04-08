@@ -42,8 +42,7 @@ void Chunk::init(int x, int y, Ref<WorldData> worldData, Array blockTypes) {
 
 	set_visible(false);
 
-	Vector3 translation = Vector3(x, 0, y) * CHUNK_SIZE;
-	set_translation(translation);
+	set_translation(Vector3(x, 0, y) * CHUNK_SIZE);
 
 	staticBody = StaticBody::_new();
 	add_child(staticBody);
