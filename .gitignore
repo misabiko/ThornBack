@@ -4,7 +4,6 @@ export_presets.cfg
 
 newstart_textures/
 .vscode/
-Project/GDNative/bin/*
 Project/GDNative/.sconsign.dblite
 *.pdb
 *.obj

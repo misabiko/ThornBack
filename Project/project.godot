@@ -9,7 +9,7 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "Resource",
+"base": "",
 "class": "WorldData",
 "language": "NativeScript",
 "path": "res://Scripts/WorldData.gdns"
