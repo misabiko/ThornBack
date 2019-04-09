@@ -6,4 +6,4 @@
 resource_name = "Chunk"
 class_name = "Chunk"
 library = ExtResource( 1 )
-
+script_class_name = "Chunk"

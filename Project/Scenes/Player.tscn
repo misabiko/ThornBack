@@ -36,5 +36,4 @@ script = ExtResource( 3 )
 wait_time = 0.1
 
 [node name="CamZoom" type="Tween" parent="."]
-
 [connection signal="timeout" from="BreakTimer" to="." method="_on_BreakTimer_timeout"]

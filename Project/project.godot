@@ -9,12 +9,24 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "",
+"base": "MeshInstance",
+"class": "Chunk",
+"language": "NativeScript",
+"path": "res://Scripts/Chunk.gdns"
+}, {
+"base": "Node",
+"class": "ChunkLoader",
+"language": "NativeScript",
+"path": "res://Scripts/ChunkLoader.gdns"
+}, {
+"base": "Resource",
 "class": "WorldData",
 "language": "NativeScript",
 "path": "res://Scripts/WorldData.gdns"
 } ]
 _global_script_class_icons={
+"Chunk": "",
+"ChunkLoader": "",
 "WorldData": ""
 }
 

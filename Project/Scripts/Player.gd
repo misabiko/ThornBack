@@ -29,13 +29,16 @@ func _ready():
 	raycast_exceptions = [self]
 	
 	$DebugHelper.add_method("Position", "debug_get_pos", get_path())
-	$DebugHelper.add_method("Chunk", "get_chunk_coord", get_path())
+	$DebugHelper.add_method("Chunk", "get_chunk_coords", get_path())
 	$DebugHelper.add_method("is_on_floor", "is_on_floor", get_path())
 	$DebugHelper.add_property("breaking_stage", get_path())
 	$DebugHelper.add_property("flying", get_path())
 
 func debug_get_pos():
 	return translation.floor()
+
+func get_chunk_coords():
+	return $"..".get_chunk_coords(translation)
 
 func _physics_process(delta):
 	if flying:
@@ -73,10 +76,10 @@ func process_inputs(delta):
 		vel.y += GRAVITY * delta
 
 	if vel:
-		var old_coords = get_chunk_coord()
+		var old_coords = get_chunk_coords()
 		vel = move_and_slide(vel, Vector3.UP)
 		
-		var new_coords = get_chunk_coord()
+		var new_coords = get_chunk_coords()
 		if new_coords != old_coords:
 			emit_signal("enter_chunk", new_coords)
 
@@ -100,10 +103,10 @@ func process_inputs_flying():
 	move.y = shift_modifier * FLY_SPEED * (int(Input.is_key_pressed(KEY_SPACE)) - int(Input.is_key_pressed(KEY_R)))
 	
 	if move:
-		var old_coords = get_chunk_coord()
+		var old_coords = get_chunk_coords()
 		move_and_slide(move)
 		
-		var new_coords = get_chunk_coord()
+		var new_coords = get_chunk_coords()
 		if new_coords != old_coords:
 			emit_signal("enter_chunk", new_coords)
 
@@ -114,12 +117,14 @@ func _input(event):
 				BUTTON_LEFT:
 					update_selection_highlight()
 					if aimed_collider:
-						start_breaking()
+						if flying:
+							$"..".remove_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
+						else:
+							start_breaking()
 				BUTTON_RIGHT:
 					update_selection_highlight()
 					if aimed_collider:
-						var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal)
-						aimed_collider.get_parent().set_block(selectedPos.x, selectedPos.y, selectedPos.z, 1)
+						$"..".add_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal, 1)
 		else:
 			match event.button_index:
 				BUTTON_LEFT:
@@ -143,16 +148,6 @@ func _input(event):
 				if event.is_pressed():
 					flying = !flying
 
-func world_to_chunk(pos):
-	return Vector3(
-		0 if fmod(pos.x, 16) == 0 else (16 + fmod(pos.x, 16) if pos.x < 0 else fmod(pos.x, 16)),
-		pos.y,
-		0 if fmod(pos.z, 16) == 0 else (16 + fmod(pos.z, 16) if pos.z < 0 else fmod(pos.z, 16))
-	)
-
-func get_chunk_coord():
-	return Vector2(translation.x / 16, translation.z / 16).floor()
-
 #Returns true if selected block changed or none is selected
 func update_selection_highlight():
 	var old_translation = selection_highlight.translation
@@ -173,8 +168,7 @@ func update_selection_highlight():
 
 func _on_BreakTimer_timeout():
 	if breaking_stage == 9:
-		var selectedPos = world_to_chunk(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
-		aimed_collider.get_parent().clear_block(selectedPos.x, selectedPos.y, selectedPos.z)
+		$"..".remove_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
 		stop_breaking()
 	else:
 		breaking_stage += 1

@@ -18,6 +18,7 @@ void Chunk::_register_methods() {
 void Chunk::_init() {}
 
 void Chunk::_ready() {
+	get_node("../..")->call_deferred("add_chunk", Vector2(coords.first, coords.second), get_path());
 	Array owners = staticBody->get_shape_owners();
 	for (int i = 0; i < owners.size(); i++)
 		staticBody->shape_owner_set_disabled(owners[i], false);
