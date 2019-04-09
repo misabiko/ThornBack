@@ -52,7 +52,11 @@ namespace godot {
 
 		int getRadius();
 
-		int ChunkLoader::getBacklogSize();
+		int getBacklogSize();
+
+		void save();
+
+		void load();
 
 		void _notification(const int what);
 	};

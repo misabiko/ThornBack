@@ -1,5 +1,5 @@
 #include "WorldData.h"
-#include <string>
+#include <File.hpp>
 
 using namespace godot;
 
@@ -32,25 +32,64 @@ void WorldData::tryInit(const std::pair<int, int>& chunk) {
 }
 
 void WorldData::load() {
+	Ref<File> saveFile = File::_new();
+	saveFile.instance();
+	saveFile->open("user://world.save", File::READ);
 
+	std::pair<int, int> coords;
+	unsigned numSameBlocks;
+	unsigned currType;
+
+	while (!saveFile->eof_reached()) {
+		coords.first = saveFile->get_32();
+		coords.second = saveFile->get_32();
+
+		chunks.emplace(coords, std::vector<BlockData>(CHUNK_VOLUME));
+		auto it = chunks.at(coords).begin();
+
+		while (numSameBlocks = saveFile->get_32()) {
+			currType = saveFile->get_8();
+
+			for (int i = 0; i < numSameBlocks; i++, it++)
+				it->set(currType, currType != 0);
+		}
+	}
+
+	saveFile->close();
+	Godot::print("World loaded!");
 }
 
 void WorldData::save() {
-	for (auto const& [coords, blocks] : chunks) {
-		std::string str;
-		unsigned numSameBlocks = 1;
-		auto it = blocks.begin();
-		unsigned currType = (it++)->type;
+	Ref<File> saveFile = File::_new();
+	saveFile.instance();
+	saveFile->open("user://world.save", File::WRITE_READ);
 
-		for (; it != blocks.end(); it++)
-			if (it->type == currType)
-				numSameBlocks++;
-			else {
-				str += std::to_string(currType) + ":" + std::to_string(numSameBlocks) + ",";
-				currType = it->type;
-				numSameBlocks = 0;
-			}
-	}
+	if (saveFile->is_open()) {
+		for (auto const& [coords, blocks] : chunks) {
+			saveFile->store_32(coords.first);
+			saveFile->store_32(coords.second);
+
+			unsigned numSameBlocks = 1;
+			auto it = blocks.begin();
+			unsigned lastType = (it++)->type;
+
+			for (; it != blocks.end(); it++)
+				if (it->type == lastType)
+					numSameBlocks++;
+				else {
+					saveFile->store_32(numSameBlocks);
+					saveFile->store_8(lastType);
+					lastType = it->type;
+					numSameBlocks = 1;
+				}
+			
+			saveFile->store_32(0);
+		}
+	}else
+		Godot::print("Couldn't create save file!");
+
+	saveFile->close();
+	Godot::print("World saved!");
 }
 
 void WorldData::_init() {

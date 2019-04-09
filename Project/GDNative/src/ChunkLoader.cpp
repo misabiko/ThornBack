@@ -13,6 +13,8 @@ void ChunkLoader::_register_methods() {
 	register_method("_process", &ChunkLoader::_process);
 	register_method("init", &ChunkLoader::init);
 	register_method("get_backlog_size", &ChunkLoader::getBacklogSize);
+	register_method("save", &ChunkLoader::save);
+	register_method("load", &ChunkLoader::load);
 	register_method("_notification", &ChunkLoader::_notification);
 
 	register_property<ChunkLoader, Array>("block_types", &ChunkLoader::blockTypes, Array());
@@ -43,6 +45,8 @@ void ChunkLoader::_init() {
 }
 
 void ChunkLoader::init() {
+	worldData->load();
+
 	float backlogSize = 256;
 	float numLoaded = 0;
 
@@ -121,6 +125,14 @@ int ChunkLoader::getRadius() {
 
 int ChunkLoader::getBacklogSize() {
 	return loadingBacklog.size();
+}
+
+void ChunkLoader::save() {
+	worldData->save();
+}
+
+void ChunkLoader::load() {
+	worldData->load();
 }
 
 void ChunkLoader::_notification(const int what) {
