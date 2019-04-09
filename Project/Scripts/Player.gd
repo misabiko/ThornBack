@@ -22,7 +22,7 @@ signal step_breaking
 signal stop_breaking
 
 var vel = Vector3()
-var flying : bool = true
+var flying : bool = false
 
 func _ready():
 	screen_center = get_viewport().size / 2
