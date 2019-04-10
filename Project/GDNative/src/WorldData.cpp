@@ -101,6 +101,4 @@ void WorldData::_init() {
 	noise->set_persistence(0.8);
 }
 
-void WorldData::_register_methods() {
-	register_method("save", &WorldData::save);
-}
+void WorldData::_register_methods() {}
