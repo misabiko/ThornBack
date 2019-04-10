@@ -24,6 +24,8 @@ signal stop_breaking
 var vel = Vector3()
 var flying : bool = false
 
+var block_type = 1
+
 func _ready():
 	screen_center = get_viewport().size / 2
 	raycast_exceptions = [self]
@@ -33,6 +35,7 @@ func _ready():
 	$DebugHelper.add_method("is_on_floor", "is_on_floor", get_path())
 	$DebugHelper.add_property("breaking_stage", get_path())
 	$DebugHelper.add_property("flying", get_path())
+	$DebugHelper.add_property("block_type", get_path())
 
 func debug_get_pos():
 	return translation.floor()
@@ -124,7 +127,13 @@ func _input(event):
 				BUTTON_RIGHT:
 					update_selection_highlight()
 					if aimed_collider:
-						$"..".add_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal, 1)
+						$"..".add_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal, block_type)
+				BUTTON_WHEEL_UP:
+					if block_type != 6:
+						block_type += 1
+				BUTTON_WHEEL_DOWN:
+					if block_type != 1:
+						block_type -= 1
 		else:
 			match event.button_index:
 				BUTTON_LEFT:

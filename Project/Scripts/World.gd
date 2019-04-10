@@ -9,6 +9,15 @@ var BlockTypes = [{
 	}, {
 		"name": "Grass",
 		"material": preload("res://Materials/grass.tres")
+	}, {
+		"name": "red_sand",
+		"material": preload("res://Materials/red_sand.tres")
+	}, {
+		"name": "wool_base",
+		"material": preload("res://Materials/wool_base.tres")
+	}, {
+		"name": "wool_colored_black",
+		"material": preload("res://Materials/wool_colored_black.tres")
 	}
 ]
 var chunks = {}
