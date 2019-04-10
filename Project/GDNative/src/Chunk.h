@@ -3,11 +3,9 @@
 
 #include <Godot.hpp>
 #include <MeshInstance.hpp>
-#include <vector>
+#include <map>
 #include <array>
 #include <ArrayMesh.hpp>
-#include <OpenSimplexNoise.hpp>
-#include <SurfaceTool.hpp>
 #include <StaticBody.hpp>
 #include <Material.hpp>
 #include "WorldData.h"
@@ -26,20 +24,25 @@ namespace godot {
 		};
 
 		struct SurfaceData {
-			std::vector<Vector3> vertices;
-			std::vector<Vector3> normals;
-			std::vector<Vector2> uvs;
-			std::vector<Color> colors;
-			std::vector<unsigned> indices;
+			Array vertices;
+			PoolVector3Array normals;
+			PoolVector2Array uvs;
+			PoolIntArray indices;
+
+			void clear() {
+				vertices.resize(0);
+				normals.resize(0);
+				uvs.resize(0);
+				indices.resize(0);
+			}
 		};
 
-		SurfaceData surfaces[3];
+		std::map<unsigned, SurfaceData> surfaces;
 		std::pair<int, int> coords;
 		Array blockTypes;
 
 		public:
 		Ref<WorldData> worldData;
-		Ref<SurfaceTool> surfaceTool;
 		StaticBody* staticBody;
 
 		static void _register_methods();

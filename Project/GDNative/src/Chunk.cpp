@@ -1,8 +1,6 @@
 #include "Chunk.h"
-#include <OS.hpp>
-#include <string>
 #include <BoxShape.hpp>
-#include <MainLoop.hpp>
+#include <PoolArrays.hpp>
 
 using namespace godot;
 
@@ -47,9 +45,10 @@ void Chunk::init(int x, int y, Ref<WorldData> worldData, Array blockTypes) {
 
 	staticBody = StaticBody::_new();
 	add_child(staticBody);
+
+	set_mesh(ArrayMesh::_new());
 	collisionMesher();
 
-	surfaceTool.instance();
 	updateMesh();
 }
 
@@ -66,7 +65,7 @@ void Chunk::clearBlock(const unsigned x, const unsigned y, const unsigned z) {
 }
 
 void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, unsigned type, Direction side) {
-	SurfaceData& surface = surfaces[type - 1];
+	SurfaceData& surface = surfaces[type];
 
 	Vector3 normal;
 	switch (side) {
@@ -106,7 +105,7 @@ void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Ve
 
 	for (int i = 0; i < 4; i++)
 		surface.normals.push_back(normal);
-	
+
 	surface.vertices.push_back(bottom_left);
 	surface.vertices.push_back(bottom_right);
 	surface.vertices.push_back(top_left);
@@ -114,39 +113,27 @@ void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Ve
 }
 
 void Chunk::updateMesh() {
-	for (int i = 0; i < blockTypes.size(); i++)
-		if (surfaces[i].vertices.size()) {
-			surfaceTool->begin(Mesh::PRIMITIVE_TRIANGLES);
+	Ref<ArrayMesh> mesh = get_mesh();
+	for (auto& [material, surface] : surfaces) {
+		Array arrays;
+		arrays.resize(Mesh::ARRAY_MAX);
+		arrays[Mesh::ARRAY_VERTEX] = surface.vertices;
+		arrays[Mesh::ARRAY_NORMAL] = surface.normals;
+		arrays[Mesh::ARRAY_TEX_UV] = surface.uvs;
+		arrays[Mesh::ARRAY_INDEX] = surface.indices;
 
-			for (int j = 0; j < surfaces[i].vertices.size(); j++) {
-				surfaceTool->add_normal(surfaces[i].normals[j]);
-				surfaceTool->add_uv(surfaces[i].uvs[j]);
-				surfaceTool->add_vertex(surfaces[i].vertices[j]);
-			}
-
-			for (int j = 0; j < surfaces[i].indices.size(); j++)
-				surfaceTool->add_index(surfaces[i].indices[j]);
-			
-			surfaceTool->generate_tangents();
-
-			surfaceTool->set_material(((Dictionary)blockTypes[i])["material"]);
-
-			if (get_mesh().is_null())
-				set_mesh(surfaceTool->commit());
-			else
-				surfaceTool->commit(get_mesh());
-		}
+		mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, arrays);
+		mesh->surface_set_material(mesh->get_surface_count() - 1, static_cast<Dictionary>(blockTypes[material - 1])["material"]);
+	}
 }
 
 void Chunk::collisionMesher() {
 	{
 		Ref<ArrayMesh> mesh = get_mesh();
-		if (!mesh.is_null()) {
-			for (int i = 0; mesh->get_surface_count(); i++) {	//;)
-				mesh->surface_remove(0);
-				surfaces[i] = SurfaceData();
-			}
-		}
+		while (mesh->get_surface_count())
+			mesh->surface_remove(0);
+		for (auto& [material, surface] : surfaces)
+			surface.clear();
 		
 		Array owners = staticBody->get_shape_owners();
 		for (int i = 0; i < owners.size(); i++)
