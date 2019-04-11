@@ -32,8 +32,8 @@ void Chunk::_process(float delta) {
 	set_process(false);
 }
 
-void Chunk::init(int x, int y, Ref<WorldData> worldData, Array blockTypes) {
-	this->blockTypes = blockTypes;
+void Chunk::init(int x, int y, Ref<WorldData> worldData, Ref<BlockLibrary> blockLibrary) {
+	this->blockLibrary = blockLibrary;
 	this->worldData = worldData;
 
 	coords = std::pair<int, int>(x, y);
@@ -123,7 +123,7 @@ void Chunk::updateMesh() {
 		arrays[Mesh::ARRAY_INDEX] = surface.indices;
 
 		mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, arrays);
-		mesh->surface_set_material(mesh->get_surface_count() - 1, static_cast<Dictionary>(blockTypes[material - 1])["material"]);
+		mesh->surface_set_material(mesh->get_surface_count() - 1, blockLibrary->get(material).material);
 	}
 }
 

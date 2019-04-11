@@ -9,6 +9,7 @@
 #include <StaticBody.hpp>
 #include <Material.hpp>
 #include "WorldData.h"
+#include "BlockLibrary.h"
 
 namespace godot {
 	class Chunk : public MeshInstance {
@@ -39,7 +40,7 @@ namespace godot {
 
 		std::map<unsigned, SurfaceData> surfaces;
 		std::pair<int, int> coords;
-		Array blockTypes;
+		Ref<BlockLibrary> blockLibrary;
 
 		public:
 		Ref<WorldData> worldData;
@@ -53,7 +54,7 @@ namespace godot {
 
 		void _process(float delta);
 
-		void init(int x, int y, Ref<WorldData> worldData, Array blockTypes);
+		void init(int x, int y, Ref<WorldData> worldData, Ref<BlockLibrary> blockLibrary);
 
 		void setBlock(const unsigned x, const unsigned y, const unsigned z, const unsigned type);
 

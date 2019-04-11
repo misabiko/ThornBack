@@ -9,6 +9,11 @@
 config_version=4
 
 _global_script_classes=[ {
+"base": "Resource",
+"class": "BlockLibrary",
+"language": "NativeScript",
+"path": "res://Scripts/BlockLibrary.gdns"
+}, {
 "base": "MeshInstance",
 "class": "Chunk",
 "language": "NativeScript",
@@ -25,6 +30,7 @@ _global_script_classes=[ {
 "path": "res://Scripts/WorldData.gdns"
 } ]
 _global_script_class_icons={
+"BlockLibrary": "",
 "Chunk": "",
 "ChunkLoader": "",
 "WorldData": ""
@@ -35,6 +41,10 @@ _global_script_class_icons={
 config/name="ThornBack"
 run/main_scene="res://Scenes/World.tscn"
 config/icon="res://icon.png"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "CustomResources" )
 
 [importer_defaults]
 
@@ -48,7 +58,7 @@ texture={
 "flags/anisotropic": false,
 "flags/filter": false,
 "flags/mipmaps": false,
-"flags/repeat": 0,
+"flags/repeat": 1,
 "flags/srgb": 2,
 "process/HDR_as_SRGB": false,
 "process/fix_alpha_border": true,

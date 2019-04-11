@@ -17,9 +17,9 @@ void ChunkLoader::_register_methods() {
 	register_method("load", &ChunkLoader::load);
 	register_method("_notification", &ChunkLoader::_notification);
 
-	register_property<ChunkLoader, Array>("block_types", &ChunkLoader::blockTypes, Array());
 	register_property<ChunkLoader, int>("radius", &ChunkLoader::setRadius, &ChunkLoader::getRadius, 8);
-	register_property<ChunkLoader, int>("delay", &ChunkLoader::delay, 100);
+	register_property<ChunkLoader, int>("initial_radius", &ChunkLoader::initialRadius, 8);
+	register_property<ChunkLoader, Ref<BlockLibrary>>("block_library", &ChunkLoader::blockLibrary, Ref<BlockLibrary>(), GODOT_METHOD_RPC_MODE_DISABLED, GODOT_PROPERTY_USAGE_DEFAULT, GODOT_PROPERTY_HINT_RESOURCE_TYPE, "BlockLibrary");
 }
 
 ChunkLoader::~ChunkLoader() {
@@ -34,10 +34,10 @@ void ChunkLoader::_init() {
 	thread.instance();
 	mutex.instance();
 	worldData = WorldData::_new();
-	
+
 	delay = 100;
-	radius = 8;
-	radiusSquared = 2 * radius * radius;
+	setRadius(8);
+	initialRadius = 8;
 	loadingComp = [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
 		return a.first * a.first + a.second * a.second < b.first * b.first + b.second * b.second;
 	};
@@ -47,13 +47,13 @@ void ChunkLoader::_init() {
 void ChunkLoader::init() {
 	worldData->load();
 
-	float backlogSize = 256;
+	float backlogSize = initialRadius * initialRadius * 4;
 	float numLoaded = 0;
 
-	for (int x = -8; x < 8; x++) {
-		for (int y = -8; y < 8; y++)	{
-			Chunk* chunk = Chunk::_new();
-			chunk->init(x, y, worldData, blockTypes);
+	for (int x = -initialRadius; x < initialRadius; x++) {
+		for (int y = -initialRadius; y < initialRadius; y++)	{
+			Chunk *chunk = Chunk::_new();
+			chunk->init(x, y, worldData, blockLibrary);
 			add_child(chunk);
 			chunks.emplace(std::pair<int, int>(x, y), chunk);
 			numLoaded++;
@@ -99,7 +99,7 @@ void ChunkLoader::loadChunk(Variant userdata) {
 		mutex->unlock();
 
 		Chunk *chunk = Chunk::_new();
-		chunk->init(coords.first, coords.second, worldData, blockTypes);
+		chunk->init(coords.first, coords.second, worldData, blockLibrary);
 		call_deferred("add_child", chunk);
 		chunks.emplace(coords, chunk);
 

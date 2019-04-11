@@ -1,29 +1,8 @@
 extends Node
 
-var BlockTypes = [{
-		"name": "Dirt",
-		"material": preload("res://Materials/dirt.tres")
-	}, {
-		"name": "Cobblestone",
-		"material": preload("res://Materials/cobblestone.tres")
-	}, {
-		"name": "Grass",
-		"material": preload("res://Materials/grass.tres")
-	}, {
-		"name": "red_sand",
-		"material": preload("res://Materials/red_sand.tres")
-	}, {
-		"name": "wool_base",
-		"material": preload("res://Materials/wool_base.tres")
-	}, {
-		"name": "wool_colored_black",
-		"material": preload("res://Materials/wool_colored_black.tres")
-	}
-]
 var chunks = {}
 
-func _ready():	
-	$ChunkLoader.block_types = BlockTypes
+func _ready():
 	$ChunkLoader.init()
 	
 	$Player/DebugHelper.add_property("delay", $ChunkLoader.get_path())
@@ -58,7 +37,3 @@ func _input(event):
 		match event.scancode:
 			KEY_J:
 				$ChunkLoader.save()
-
-func _exit_tree():
-	for type in BlockTypes:
-		type.material.unreference()

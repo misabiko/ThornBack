@@ -11,6 +11,7 @@
 #include <list>
 #include <functional>
 #include "WorldData.h"
+#include "BlockLibrary.h"
 
 namespace godot {
 	class ChunkLoader : public Node {
@@ -19,19 +20,19 @@ namespace godot {
 		Ref<Thread> thread;
 		Ref<Mutex> mutex;
 
-		Array blockTypes;
-
 		std::map<std::pair<int, int>, Chunk*> chunks;
 		WorldData* worldData;
+		Ref<BlockLibrary> blockLibrary;
 		std::list<std::pair<int, int>> loadingBacklog;
 		std::function<bool(std::pair<int, int>, std::pair<int, int>)> loadingComp;
 
 		int radiusSquared;
+		int radius;
+		int initialRadius;
 		std::pair<int, int> lastCoords;
 		bool quitRequested;
 
 		public:
-		int radius;
 		int delay;
 
 		static void _register_methods();
