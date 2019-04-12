@@ -25,6 +25,7 @@ var vel = Vector3()
 var flying : bool = false
 
 var block_type = 1
+var schedule_chunks : bool = true
 
 func _ready():
 	screen_center = get_viewport().size / 2
@@ -36,6 +37,7 @@ func _ready():
 	$DebugHelper.add_property("breaking_stage", get_path())
 	$DebugHelper.add_property("flying", get_path())
 	$DebugHelper.add_property("block_type", get_path())
+	$DebugHelper.add_property("schedule_chunks", get_path())
 
 func debug_get_pos():
 	return translation.floor()
@@ -83,7 +85,7 @@ func process_inputs(delta):
 		vel = move_and_slide(vel, Vector3.UP)
 		
 		var new_coords = get_chunk_coords()
-		if new_coords != old_coords:
+		if schedule_chunks and new_coords != old_coords:
 			emit_signal("enter_chunk", new_coords)
 
 func process_inputs_flying():
@@ -156,6 +158,9 @@ func _input(event):
 			KEY_F:
 				if event.is_pressed():
 					flying = !flying
+			KEY_Y:
+				if event.is_pressed():
+					schedule_chunks = !schedule_chunks
 
 #Returns true if selected block changed or none is selected
 func update_selection_highlight():

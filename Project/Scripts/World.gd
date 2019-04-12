@@ -5,8 +5,8 @@ var chunks = {}
 func _ready():
 	$ChunkLoader.init()
 	
-	$Player/DebugHelper.add_property("delay", $ChunkLoader.get_path())
 	$Player/DebugHelper.add_method("Chunks to load", "get_backlog_size", $ChunkLoader.get_path())
+	$Player/DebugHelper.add_property("load_chunks", $ChunkLoader.get_path())
 
 func add_chunk(coords, chunk_path):
 	chunks[coords] = chunk_path
@@ -37,3 +37,5 @@ func _input(event):
 		match event.scancode:
 			KEY_J:
 				$ChunkLoader.save()
+			KEY_U:
+				$ChunkLoader.load_chunks = !$ChunkLoader.load_chunks

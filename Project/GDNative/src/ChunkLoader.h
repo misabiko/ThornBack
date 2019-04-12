@@ -31,6 +31,7 @@ namespace godot {
 		int initialRadius;
 		std::pair<int, int> lastCoords;
 		bool quitRequested;
+		bool loadChunks;
 
 		public:
 		int delay;
