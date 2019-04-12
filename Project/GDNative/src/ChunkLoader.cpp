@@ -69,7 +69,6 @@ void ChunkLoader::_process(float delta) {
 }
 
 void ChunkLoader::updateChunkLoadings(Vector2 coords) {
-	mutex->lock();
 	lastCoords = std::pair<int, int>(coords.x, coords.y);
 	loadingBacklog.clear();
 
@@ -84,8 +83,6 @@ void ChunkLoader::updateChunkLoadings(Vector2 coords) {
 	
 	if (!loadingBacklog.empty())
 		loadingBacklog.sort(loadingComp);
-	
-	mutex->unlock();
 }
 
 void ChunkLoader::loadChunk(Variant userdata) {
