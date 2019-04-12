@@ -19,25 +19,22 @@ void ChunkLoader::_register_methods() {
 
 	register_property<ChunkLoader, int>("radius", &ChunkLoader::setRadius, &ChunkLoader::getRadius, 8);
 	register_property<ChunkLoader, int>("initial_radius", &ChunkLoader::initialRadius, 8);
+	register_property<ChunkLoader, Ref<WorldData>>("world_data", &ChunkLoader::worldData, Ref<WorldData>(), GODOT_METHOD_RPC_MODE_DISABLED, GODOT_PROPERTY_USAGE_DEFAULT, GODOT_PROPERTY_HINT_RESOURCE_TYPE, "WorldData");
 	register_property<ChunkLoader, Ref<BlockLibrary>>("block_library", &ChunkLoader::blockLibrary, Ref<BlockLibrary>(), GODOT_METHOD_RPC_MODE_DISABLED, GODOT_PROPERTY_USAGE_DEFAULT, GODOT_PROPERTY_HINT_RESOURCE_TYPE, "BlockLibrary");
 }
 
 ChunkLoader::~ChunkLoader() {
 	if (thread->is_active())
 		thread->wait_to_finish();
-
-	worldData->unreference();
-	worldData->free();
 }
 
 void ChunkLoader::_init() {
 	thread.instance();
 	mutex.instance();
-	worldData = WorldData::_new();
 
 	delay = 100;
 	setRadius(8);
-	initialRadius = 8;
+	initialRadius = 10;
 	loadingComp = [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
 		return a.first * a.first + a.second * a.second < b.first * b.first + b.second * b.second;
 	};

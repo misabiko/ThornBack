@@ -21,7 +21,7 @@ namespace godot {
 		Ref<Mutex> mutex;
 
 		std::map<std::pair<int, int>, Chunk*> chunks;
-		WorldData* worldData;
+		Ref<WorldData> worldData;
 		Ref<BlockLibrary> blockLibrary;
 		std::list<std::pair<int, int>> loadingBacklog;
 		std::function<bool(std::pair<int, int>, std::pair<int, int>)> loadingComp;
