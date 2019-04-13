@@ -289,3 +289,46 @@ func try_floor(value):
 		return floor(value)
 	else:
 		return value
+
+
+
+"""
+Nice mountains with lakes
+[node name=""WorldGenVisualizer"" type=""Node""]
+script = ExtResource( 1 )
+e_noise = SubResource( 1 )
+m_noise = SubResource( 2 )
+seed_e = 5
+seed_m = 1
+width = 2
+do_floor = true
+height = 0.182
+freq1 = 6.788
+freq2 = 25.566
+freq3 = 33.42
+freq4 = 25.214
+amp1 = 1.0
+amp2 = 0.637
+amp3 = 0.09
+amp4 = 0.049
+mult2 = 1.0
+mult3 = -1.0
+enable2 = true
+enable3 = true
+snow = 0.928
+tundra = 0.8
+water = 0.224
+deep_water = 0.112
+beach = 0.283
+dist1 = -4.0
+dist1_offset = -0.089
+dist2 = 1.0
+dist3 = 1.0
+dist_mult2 = 1.0
+dist_mult3 = -2.0
+dist_mult3_offset = 0.406
+dist_post = -0.933033
+dist_post_offset = -0.015
+distm = 0.287175
+use_distm = true
+"""
