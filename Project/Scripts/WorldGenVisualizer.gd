@@ -6,6 +6,7 @@ export(OpenSimplexNoise) var m_noise = OpenSimplexNoise.new()
 export(int) var seed_e setget set_seed_e
 export(int) var seed_m setget set_seed_m
 export(int, 1, 500, 2) var width = 16 setget set_width
+export(int, 1, 5) var radius = 1 setget set_radius
 export(bool) var do_floor := false setget set_do_floor
 export(bool) var show_map := true setget set_show_map
 export(bool) var show_moisture := false setget set_show_moisture
@@ -15,17 +16,17 @@ export(float, 1, 50) var freq1 = 1 setget set_freq1
 export(float, 1, 50) var freq2 = 1 setget set_freq2
 export(float, 1, 50) var freq3 = 1 setget set_freq3
 export(float, 1, 50) var freq4 = 1 setget set_freq4
-export(float, 0.01, 1) var amp1 = 0.1 setget set_amp1
-export(float, 0.01, 1) var amp2 = 0.1 setget set_amp2
-export(float, 0.01, 1) var amp3 = 0.1 setget set_amp3
+export(float, -1, 1) var amp1 = 0.1 setget set_amp1
+export(float, -1, 1) var amp2 = 0.1 setget set_amp2
+export(float, -1, 1) var amp3 = 0.1 setget set_amp3
 export(float, 0, 2) var amp4 = 0.1 setget set_amp4
-export(float, -5, 5) var mult2 = 0 setget set_mult2
-export(float, -5, 5) var mult3 = 0 setget set_mult3
+export(float, -1, 1) var mult2 = 0 setget set_mult2
+export(float, -1, 1) var mult3 = 0 setget set_mult3
 export(bool) var enable1 = true setget set_enable1
 export(bool) var enable2 = false setget set_enable2
 export(bool) var enable3 = false setget set_enable3
 export(float, 0, 1) var snow = 0.8 setget set_snow
-export(float, 0, 1) var tundra = 0.7 setget set_tundra
+export(float, 0, 1) var stone = 0.7 setget set_stone
 export(bool) var use_water = true setget set_use_water
 export(float, 0, 1) var water = 0.3 setget set_water
 export(float, 0, 1) var deep_water = 0.2 setget set_deep_water
@@ -47,76 +48,151 @@ export(float, EASE) var distm setget set_distm
 export(bool) var use_distm setget set_use_distm
 export(float, -1, 1) var dist_offsetm setget set_dist_offsetm
 export(bool) var do_update = true setget set_do_update
+export(int, "Custom", "Mountains", "Plains") var mode setget set_mode
 
 func _ready():
 	update()
 
 func update():
 	if do_update && has_node("Map"):
-		if show_map:
-			for i in range(width):
-				for j in range(width):
-					var n = Vector2(i, j) / width - Vector2(0.5, 0.5)
-					var e : float
-					var color : Color
-					var c : float = 1
-					var m = ease(amp4 * (0.5 + m_noise.get_noise_2dv(freq4 * n) / 2) + dist_offsetm, distm) * 2 - 1
-					
-					var e1 = amp1 * (0.5 + e_noise.get_noise_2dv(freq1 * n) / 2)
-					e1 = ease(e1 + dist1_offset, dist1)
-					
-					var e2 = (amp2 * e_noise.get_noise_2dv(freq2 * n) * (ease(e1 - dist_mult2_offset, dist_mult2) * mult2 if mult2 > 0 else (ease((1 - e1) - dist_mult2_offset, dist_mult2) * (-mult2) if mult2 < 0 else 1)))
-					e2 = ease((e2 + 1) / 2 + dist2_offset, dist2) * 2 - 1
-					
-					var e3 = (amp3 * e_noise.get_noise_2dv(freq3 * n) * (ease(e1 - dist_mult3_offset, dist_mult3) * mult3 if mult3 > 0 else (ease((1 - e1) - dist_mult3_offset, dist_mult3) * (-mult3) if mult3 < 0 else 1)))
-					e3 = ease((e3 + 1) / 2 + dist3_offset, dist3) * 2 - 1
-					
-					e = (
-							(e1 if enable1 else 0) +
-							(e2 if enable2 else 0) +
-							(e3 if enable3 else 0)
-						)
-					
-					if use_dist_post:
-						e = ease(e + dist_post_offset, dist_post)
-					
-					color = biome(e, m)
-					if use_water and e < water:
-						e = water
-					
-					$Map.multimesh.set_instance_color(i + width * j, color)
-					$Map.multimesh.set_instance_transform(
-						i + width * j,
-						Transform().translated(Vector3(
-							i - width/2,
-							try_floor(e * height * width),
-							j - width/2
-						)))
-		if show_moisture:
-			for i in range(width):
-				for j in range(width):
-					var n = Vector2(i, j) / width - Vector2(0.5, 0.5)
-					var e : float
-					var color : Color
-					var c : float = 1
-					var m = amp4 * m_noise.get_noise_2dv(freq4 * n)
-					m = ease(m + dist_offsetm, distm)
-					
-					if show_moisture_h:
-						e = m
-						c = (e + 1) / 2
-					else:
-						c = (m + 1) / 2
-					color = Color(c, c, c)
-					
-					$MoistureMap.multimesh.set_instance_color(i + width * j, color)
-					$MoistureMap.multimesh.set_instance_transform(
-						i + width * j,
-						Transform().translated(Vector3(
-							i - width/2,
-							try_floor(e * height * width),
-							j - width/2
-						)))
+		match mode:
+			0:
+				custom()
+			1:
+				mountains()
+			2:
+				plains()
+
+func set_mode(new_mode):
+	mode = new_mode
+	update()
+
+func custom():
+	if show_map:
+		for i in range(width * radius):
+			for j in range(width * radius):
+				var n = Vector2(i, j) / width - Vector2.ONE * 0.5 * radius
+				var e : float
+				var color : Color
+				var c : float = 1
+				var m = ease(amp4 * (0.5 + m_noise.get_noise_2dv(freq4 * n) / 2) + dist_offsetm, distm) * 2 - 1
+				
+				var e1 = amp1 * (0.5 + e_noise.get_noise_2dv(freq1 * n) / 2)
+				e1 = ease(e1 + dist1_offset, dist1)
+				
+				var e2 = (amp2 * e_noise.get_noise_2dv(freq2 * n) * (
+					ease(e1 - dist_mult2_offset, dist_mult2) * mult2 if mult2 > 0 else (
+						ease((1 - e1) - dist_mult2_offset, dist_mult2) * (-mult2) if mult2 < 0 else 1
+					)
+				))
+				e2 = ease((e2 + 1) / 2 + dist2_offset, dist2) * 2 - 1
+				
+				var e3 = (amp3 * e_noise.get_noise_2dv(freq3 * n) * (ease(e1 - dist_mult3_offset, dist_mult3) * mult3 if mult3 > 0 else (ease((1 - e1) - dist_mult3_offset, dist_mult3) * (-mult3) if mult3 < 0 else 1)))
+				e3 = ease((e3 + 1) / 2 + dist3_offset, dist3) * 2 - 1
+				
+				e = (
+						(e1 if enable1 else 0) +
+						(e2 if enable2 else 0) +
+						(e3 if enable3 else 0)
+					)
+				
+				if use_dist_post:
+					e = ease(e + dist_post_offset, dist_post)
+				
+				color = biome(e, m)
+				if use_water and e < water:
+					e = water
+				
+				$Map.multimesh.set_instance_color(i + width * radius * j, color)
+				$Map.multimesh.set_instance_transform(
+					i + width * radius * j,
+					Transform().translated(Vector3(
+						i - width * radius / 2,
+						try_floor(e * height * width),
+						j - width * radius / 2
+					)))
+	if show_moisture:
+		for i in range(width * radius):
+			for j in range(width * radius):
+				var n = Vector2(i, j) / width - Vector2.ONE * 0.5 * radius
+				var e : float
+				var color : Color
+				var c : float = 1
+				var m = amp4 * m_noise.get_noise_2dv(freq4 * n)
+				m = ease(m + dist_offsetm, distm)
+				
+				if show_moisture_h:
+					e = m
+					c = (e + 1) / 2
+				else:
+					c = (m + 1) / 2
+				color = Color(c, c, c)
+				
+				$MoistureMap.multimesh.set_instance_color(i + width * radius * j, color)
+				$MoistureMap.multimesh.set_instance_transform(
+					i + width * radius * j,
+					Transform().translated(Vector3(
+						i - width * radius / 2,
+						try_floor(e * height * width),
+						j - width * radius / 2
+					)))
+
+func plains():
+	for i in range(width * radius):
+		for j in range(width * radius):
+			var n = Vector2(i, j) / width - Vector2.ONE * 0.5 * radius
+			var m = ease(0.1 * (0.5 + m_noise.get_noise_2dv(n) / 2) + 0.454, 1) * 2 - 1
+			
+			var e1 = ease((0.5 + e_noise.get_noise_2dv(7.567 * n) / 2) + 0.02, -8.57)
+			
+			var e2 = ease(((0.244 * e_noise.get_noise_2dv(9.588 * n) * e1) + 1) / 2 + 0.041, -3.36) * 2 - 1
+			
+			var e3 = ease(((0.182 * e_noise.get_noise_2dv(25.246 * n) * (e1 - 0.433)) + 1) / 2 , -1.57) * 2 - 1
+			
+			var e = e2 + e3
+			
+			var color = biome(e, m)
+			if use_water and e < water:
+				e = water
+			
+			$Map.multimesh.set_instance_color(i + width * radius * j, color)
+			$Map.multimesh.set_instance_transform(
+				i + width * radius * j,
+				Transform().translated(Vector3(
+					i - width * radius / 2,
+					try_floor(e * height * width),
+					j - width * radius / 2
+				)))
+
+func mountains():
+	for i in range(width * radius):
+		for j in range(width * radius):
+			var n = Vector2(i, j) / width - Vector2.ONE * 0.5 * radius
+			var e : float
+			var color : Color
+			var c : float = 1
+			var m = ease(amp4 * (0.5 + m_noise.get_noise_2dv(freq4 * n) / 2) + dist_offsetm, distm) * 2 - 1
+			
+			var e1 = ease(0.5 + e_noise.get_noise_2dv(6.788 * n) / 2 - 0.089, -4)
+			
+			var e2 = 0.637 * e_noise.get_noise_2dv(25.566 * n) * e1 * mult2
+			
+			var e3 = (0.09 * e_noise.get_noise_2dv(33.42 * n) * ease((1 - e1) - 0.406, -2))
+			
+			e = ease(e1 + e2 + e3 - 0.015, -0.93)
+			
+			color = biome(e, m)
+			if use_water and e < water:
+				e = water
+			
+			$Map.multimesh.set_instance_color(i + width * radius * j, color)
+			$Map.multimesh.set_instance_transform(
+				i + width * radius * j,
+				Transform().translated(Vector3(
+					i - width * radius / 2,
+					try_floor(e * height * width),
+					j - width * radius / 2
+				)))
 
 func biome(e, m):
 	if use_water and e < deep_water:
@@ -127,8 +203,8 @@ func biome(e, m):
 		return Color("#f8dfb2")
 	elif e >= snow + m:
 		return Color.white
-	elif e >= tundra + m:
-		return Color("#00ec38")
+	elif e >= stone + m:
+		return Color.gray
 	else:
 		return Color(0, 0.52, 0.125, 1)
 
@@ -159,11 +235,17 @@ func set_show_moisture_h(new_show_moisture_h):
 func set_width(new_width):
 	width = new_width
 	if has_node("Map"):
-		$Map.multimesh.instance_count = width * width
-		$MoistureMap.multimesh.instance_count = width * width
+		$Map.multimesh.instance_count = width * width * radius * radius
+		$MoistureMap.multimesh.instance_count = width * width * radius * radius
 	update()
 func set_height(new_height):
 	height = new_height
+	update()
+func set_radius(new_radius):
+	radius = new_radius
+	if has_node("Map"):
+		$Map.multimesh.instance_count = width * width * radius * radius
+		$MoistureMap.multimesh.instance_count = width * width * radius * radius
 	update()
 	
 func set_mult2(new_mult):
@@ -273,8 +355,8 @@ func set_water(new_water):
 func set_deep_water(new_deep_water):
 	deep_water = new_deep_water
 	update()
-func set_tundra(new_tundra):
-	tundra = new_tundra
+func set_stone(new_stone):
+	stone = new_stone
 	update()
 func set_beach(new_beach):
 	beach = new_beach
@@ -316,7 +398,7 @@ mult3 = -1.0
 enable2 = true
 enable3 = true
 snow = 0.928
-tundra = 0.8
+stone = 0.8
 water = 0.224
 deep_water = 0.112
 beach = 0.283
@@ -331,4 +413,43 @@ dist_post = -0.933033
 dist_post_offset = -0.015
 distm = 0.287175
 use_distm = true
+
+Decent plains
+[node name=""WorldGenVisualizer"" type=""Node""]
+script = ExtResource( 1 )
+e_noise = SubResource( 1 )
+m_noise = SubResource( 2 )
+seed_e = 8
+seed_m = 2
+width = 2
+do_floor = true
+height = 0.153
+freq1 = 7.567
+freq2 = 9.588
+freq3 = 25.246
+amp1 = 1.0
+amp2 = 0.244
+amp3 = 0.182
+mult2 = 1.0
+mult3 = 1.0
+enable1 = false
+enable2 = true
+enable3 = true
+snow = 0.95
+stone = 0.9
+water = 0.1
+deep_water = 0.08
+beach = 0.12
+dist1 = -8.57419
+dist1_offset = 0.02
+dist2 = -3.36358
+dist2_offset = 0.041
+dist3 = -1.56917
+dist3_offset = -0.001
+dist_mult2 = 1.0
+dist_mult3 = 1.0
+dist_mult3_offset = 0.433
+dist_post = 1.0
+distm = 1.0
+dist_offsetm = 0.454
 """

@@ -3,11 +3,11 @@
 [ext_resource path="res://Scripts/WorldGenVisualizer.gd" type="Script" id=1]
 
 [sub_resource type="OpenSimplexNoise" id=1]
-seed = 5
+seed = 1
 period = 2.0
 
 [sub_resource type="OpenSimplexNoise" id=2]
-seed = 1
+seed = 2
 period = 1.0
 
 [sub_resource type="SpatialMaterial" id=3]
@@ -20,10 +20,10 @@ size = Vector3( 1, 1, 1 )
 [sub_resource type="MultiMesh" id=5]
 color_format = 1
 transform_format = 1
-instance_count = 4
+instance_count = 16
 mesh = SubResource( 4 )
-transform_array = PoolVector3Array( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1, 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
-color_array = PoolColorArray( 0.0156863, 0.286275, 0.717647, 1, 0.0980392, 0.0156863, 0.717647, 1, 0.0980392, 0.0156863, 0.717647, 1, 0.972549, 0.87451, 0.698039, 1 )
+transform_array = PoolVector3Array( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -2, 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -2, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -2, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -2, 1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -1, 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, -1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, -1, 1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, -1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1 )
+color_array = PoolColorArray( 0, 0.517647, 0.121569, 1, 0, 0.517647, 0.121569, 1, 0, 0.517647, 0.121569, 1, 0, 0.517647, 0.121569, 1, 0.0980392, 0.0156863, 0.717647, 1, 0, 0.517647, 0.121569, 1, 0, 0.517647, 0.121569, 1, 0, 0.517647, 0.121569, 1, 0, 0.517647, 0.121569, 1, 0, 0.517647, 0.121569, 1, 0, 0.517647, 0.121569, 1, 0.972549, 0.87451, 0.698039, 1, 0, 0.517647, 0.121569, 1, 0, 0.517647, 0.121569, 1, 0, 0.517647, 0.121569, 1, 0, 0.517647, 0.121569, 1 )
 
 [sub_resource type="SpatialMaterial" id=6]
 vertex_color_use_as_albedo = true
@@ -35,49 +35,49 @@ size = Vector3( 1, 1, 1 )
 [sub_resource type="MultiMesh" id=8]
 color_format = 1
 transform_format = 1
-instance_count = 4
+instance_count = 16
 mesh = SubResource( 7 )
-transform_array = PoolVector3Array( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
-color_array = PoolColorArray( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 )
+transform_array = PoolVector3Array( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+color_array = PoolColorArray( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 )
 
 [node name="WorldGenVisualizer" type="Node"]
 script = ExtResource( 1 )
 e_noise = SubResource( 1 )
 m_noise = SubResource( 2 )
-seed_e = 5
-seed_m = 1
+seed_e = 1
+seed_m = 2
 width = 2
+radius = 2
 do_floor = true
-height = 0.182
-freq1 = 6.788
-freq2 = 25.566
-freq3 = 33.42
-freq4 = 25.214
+height = 0.153
+freq1 = 7.567
+freq2 = 9.588
+freq3 = 25.246
 amp1 = 1.0
-amp2 = 0.637
-amp3 = 0.09
-amp4 = 0.049
+amp2 = 0.244
+amp3 = 0.182
 mult2 = 1.0
-mult3 = -1.0
+mult3 = 1.0
+enable1 = false
 enable2 = true
 enable3 = true
-snow = 0.928
-tundra = 0.8
-water = 0.224
-deep_water = 0.112
-beach = 0.283
-dist1 = -4.0
-dist1_offset = -0.089
-dist2 = 1.0
-dist3 = 1.0
+snow = 0.95
+stone = 0.9
+water = 0.1
+deep_water = 0.08
+beach = 0.12
+dist1 = -8.57419
+dist1_offset = 0.02
+dist2 = -3.36358
+dist2_offset = 0.041
+dist3 = -1.56917
+dist3_offset = -0.001
 dist_mult2 = 1.0
-dist_mult3 = -2.0
-dist_mult3_offset = 0.406
-dist_post = -0.933033
-dist_post_offset = -0.015
-distm = 0.287175
-use_distm = true
-dist_offsetm = 0.155
+dist_mult3 = 1.0
+dist_mult3_offset = 0.433
+dist_post = 1.0
+distm = 1.0
+dist_offsetm = 0.454
 
 [node name="Map" type="MultiMeshInstance" parent="."]
 multimesh = SubResource( 5 )
@@ -89,3 +89,4 @@ multimesh = SubResource( 8 )
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( 0.965926, 0.12941, -0.224144, 0, 0.866025, 0.5, 0.258819, -0.482963, 0.836516, 0, 50, 0 )
 editor_only = true
+
