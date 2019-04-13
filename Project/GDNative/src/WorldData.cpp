@@ -36,27 +36,30 @@ void WorldData::load() {
 	saveFile.instance();
 	saveFile->open("user://world.save", File::READ);
 
-	std::pair<int, int> coords;
-	unsigned numSameBlocks;
-	unsigned currType;
+	if (saveFile->is_open()) {
+		std::pair<int, int> coords;
+		unsigned numSameBlocks;
+		unsigned currType;
 
-	while (!saveFile->eof_reached()) {
-		coords.first = saveFile->get_32();
-		coords.second = saveFile->get_32();
+		while (!saveFile->eof_reached()) {
+			coords.first = saveFile->get_32();
+			coords.second = saveFile->get_32();
 
-		chunks.emplace(coords, std::vector<BlockData>(CHUNK_VOLUME));
-		auto it = chunks.at(coords).begin();
+			chunks.emplace(coords, std::vector<BlockData>(CHUNK_VOLUME));
+			auto it = chunks.at(coords).begin();
 
-		while (numSameBlocks = saveFile->get_32()) {
-			currType = saveFile->get_8();
+			while (numSameBlocks = saveFile->get_32()) {
+				currType = saveFile->get_8();
 
-			for (int i = 0; i < numSameBlocks; i++, it++)
-				it->set(currType, currType != 0);
+				for (int i = 0; i < numSameBlocks; i++, it++)
+					it->set(currType, currType != 0);
+			}
 		}
-	}
 
-	saveFile->close();
-	Godot::print("World loaded!");
+		saveFile->close();
+		Godot::print("World loaded!");
+	}else
+		Godot::print("Couldn't open save file!");
 }
 
 void WorldData::save() {
@@ -85,11 +88,11 @@ void WorldData::save() {
 			
 			saveFile->store_32(0);
 		}
+		
+		saveFile->close();
+		Godot::print("World saved!");
 	}else
 		Godot::print("Couldn't create save file!");
-
-	saveFile->close();
-	Godot::print("World saved!");
 }
 
 void WorldData::_init() {
