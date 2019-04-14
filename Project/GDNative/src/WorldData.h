@@ -31,7 +31,8 @@ namespace godot {
 		};
 
 		std::map<std::pair<int, int>, std::vector<BlockData>> chunks;
-		Ref<OpenSimplexNoise> noise;
+		Ref<OpenSimplexNoise> noiseE;
+		Ref<OpenSimplexNoise> noiseM;
 
 		BlockData* getBlock(const std::map<std::pair<int, int>, std::vector<BlockData>>::iterator& chunk, const int& x, const int& y, const int& z);
 
@@ -39,6 +40,8 @@ namespace godot {
 		BlockData* getBlock(const std::pair<int, int>& chunk, const int& x, const int& y, const int& z);
 
 		void tryInit(const std::pair<int, int>& chunk);
+
+		double ease(double s, double curve);
 
 		void load();
 

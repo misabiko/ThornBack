@@ -6,16 +6,16 @@ export(OpenSimplexNoise) var m_noise = OpenSimplexNoise.new()
 export(int) var seed_e setget set_seed_e
 export(int) var seed_m setget set_seed_m
 export(int, 1, 500, 2) var width = 16 setget set_width
-export(int, 1, 5) var radius = 1 setget set_radius
+export(int, 1, 15) var radius = 1 setget set_radius
 export(bool) var do_floor := false setget set_do_floor
 export(bool) var show_map := true setget set_show_map
 export(bool) var show_moisture := false setget set_show_moisture
 export(bool) var show_moisture_h := true setget set_show_moisture_h
-export(float, 0.01, 1) var height = 1 setget set_height
-export(float, 1, 50) var freq1 = 1 setget set_freq1
-export(float, 1, 50) var freq2 = 1 setget set_freq2
-export(float, 1, 50) var freq3 = 1 setget set_freq3
-export(float, 1, 50) var freq4 = 1 setget set_freq4
+export(float, 0.01, 3) var height = 1 setget set_height
+export(float, 1, 5) var freq1 = 1 setget set_freq1
+export(float, 1, 5) var freq2 = 1 setget set_freq2
+export(float, 1, 5) var freq3 = 1 setget set_freq3
+export(float, 1, 5) var freq4 = 1 setget set_freq4
 export(float, -1, 1) var amp1 = 0.1 setget set_amp1
 export(float, -1, 1) var amp2 = 0.1 setget set_amp2
 export(float, -1, 1) var amp3 = 0.1 setget set_amp3
@@ -147,7 +147,7 @@ func plains():
 			
 			var e2 = ease(((0.244 * e_noise.get_noise_2dv(9.588 * n) * e1) + 1) / 2 + 0.041, -3.36) * 2 - 1
 			
-			var e3 = ease(((0.182 * e_noise.get_noise_2dv(25.246 * n) * (e1 - 0.433)) + 1) / 2 , -1.57) * 2 - 1
+			var e3 = ease(((0.182 * e_noise.get_noise_2dv(25.246 * n) * max(e1 - 0.433, 0)) + 1) / 2 , -1.57) * 2 - 1
 			
 			var e = e2 + e3
 			

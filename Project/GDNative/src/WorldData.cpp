@@ -1,5 +1,6 @@
 #include "WorldData.h"
 #include <File.hpp>
+#include <algorithm>
 
 using namespace godot;
 
@@ -22,8 +23,18 @@ void WorldData::tryInit(const std::pair<int, int>& chunk) {
 	int y = 0;
 	for (int x = 0; x < CHUNK_SIZE; x++)
 		for (int z = 0; z < CHUNK_SIZE; z++) {
-			y = std::floor((noise->get_noise_2d((x + chunkX) / 5.0f, (z + chunkY) / 5.0f) / 2.0f + 0.5f) * 60.0f);
-	
+			Vector2 n = Vector2((x + chunkX) / 5.0f, (z + chunkY) / 5.0f) / 20 - Vector2(0.5, 0.5);
+						
+			float e1 = ease((0.5 + noiseE->get_noise_2dv(7.567 * n) / 2) + 0.02, -8.57);
+			
+			float e2 = ease(((0.244 * noiseE->get_noise_2dv(9.588 * n) * e1) + 1) / 2 + 0.041, -3.36) * 2 - 1;
+			
+			float e3 = ease(((0.182 * noiseE->get_noise_2dv(25.246 * n) * std::max<double>(e1 - 0.433, 0)) + 1) / 2 , -1.57) * 2 - 1;
+			
+			float e = e2 + e3;
+
+			y = std::floor(std::clamp<double>((e + 3) * 15.3, 0, 127));
+
 			getBlock(it.first, x, y, z)->set(1, true);
 
 			for (int j = 0; j < y; j++)
@@ -31,9 +42,29 @@ void WorldData::tryInit(const std::pair<int, int>& chunk) {
 		}
 }
 
+double WorldData::ease(double s, double curve) {
+	if (s < 0)
+		s = 0;
+	else if (s > 1.0)
+		s = 1.0;
+	if (curve > 0)	{
+		if (curve < 1.0)
+			return 1.0 - std::pow(1.0 - s, 1.0 / curve);
+		else
+			return std::pow(s, curve);
+	} else if (curve < 0) {
+		//inout ease
+
+		if (s < 0.5)
+			return std::pow(s * 2.0, -curve) * 0.5;
+		else
+			return (1.0 - std::pow(1.0 - (s - 0.5) * 2.0, -curve)) * 0.5 + 0.5;
+	} else
+		return 0; // no ease (raw)
+}
+
 void WorldData::load() {
 	Ref<File> saveFile = File::_new();
-	saveFile.instance();
 	saveFile->open("user://world.save", File::READ);
 
 	if (saveFile->is_open()) {
@@ -55,11 +86,11 @@ void WorldData::load() {
 					it->set(currType, currType != 0);
 			}
 		}
-
-		saveFile->close();
 		Godot::print("World loaded!");
 	}else
 		Godot::print("Couldn't open save file!");
+
+	saveFile->close();
 }
 
 void WorldData::save() {
@@ -96,12 +127,14 @@ void WorldData::save() {
 }
 
 void WorldData::_init() {
-	noise.instance();
-	
-	noise->set_seed(43);
-	noise->set_octaves(4);
-	noise->set_period(20.0);
-	noise->set_persistence(0.8);
+	noiseE.instance();
+	noiseM.instance();
+
+	noiseE->set_octaves(1);
+	noiseE->set_period(2);
+
+	noiseM->set_octaves(1);
+	noiseM->set_period(1);
 }
 
 void WorldData::_register_methods() {}

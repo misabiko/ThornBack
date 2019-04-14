@@ -18,7 +18,7 @@ void ChunkLoader::_register_methods() {
 	register_method("_notification", &ChunkLoader::_notification);
 
 	register_property<ChunkLoader, int>("radius", &ChunkLoader::setRadius, &ChunkLoader::getRadius, 8);
-	register_property<ChunkLoader, int>("initial_radius", &ChunkLoader::initialRadius, 8);
+	register_property<ChunkLoader, int>("initial_radius", &ChunkLoader::initialRadius, 10);
 	register_property<ChunkLoader, bool>("load_chunks", &ChunkLoader::loadChunks, true);
 	register_property<ChunkLoader, Ref<WorldData>>("world_data", &ChunkLoader::worldData, Ref<WorldData>(), GODOT_METHOD_RPC_MODE_DISABLED, GODOT_PROPERTY_USAGE_DEFAULT, GODOT_PROPERTY_HINT_RESOURCE_TYPE, "WorldData");
 	register_property<ChunkLoader, Ref<BlockLibrary>>("block_library", &ChunkLoader::blockLibrary, Ref<BlockLibrary>(), GODOT_METHOD_RPC_MODE_DISABLED, GODOT_PROPERTY_USAGE_DEFAULT, GODOT_PROPERTY_HINT_RESOURCE_TYPE, "BlockLibrary");
@@ -102,7 +102,7 @@ void ChunkLoader::loadChunk(Variant userdata) {
 		mutex->lock();
 
 		if (hasBacklog = !loadingBacklog.empty())
-			OS::get_singleton()->delay_msec(std::min<int>((std::pow(loadingBacklog.front().first - lastCoords.first, 2) + std::pow(loadingBacklog.front().second - lastCoords.second, 2)) * 10, 500));
+			OS::get_singleton()->delay_msec(std::min<int>((std::pow(loadingBacklog.front().first - lastCoords.first, 2) + std::pow(loadingBacklog.front().second - lastCoords.second, 2)) * 10, 100));
 	}
 	
 	mutex->unlock();
