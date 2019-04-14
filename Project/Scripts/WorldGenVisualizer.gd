@@ -1,25 +1,34 @@
-tool
 extends Node
+
+const CHUNK_SIZE : int = 16
+const WORLD_HEIGHT : int = 256
 
 export(OpenSimplexNoise) var e_noise = OpenSimplexNoise.new()
 export(OpenSimplexNoise) var m_noise = OpenSimplexNoise.new()
 export(int) var seed_e setget set_seed_e
 export(int) var seed_m setget set_seed_m
-export(int, 1, 500, 2) var width = 16 setget set_width
-export(int, 1, 15) var radius = 1 setget set_radius
+export(int, 1, 25) var radius = 1 setget set_radius
 export(bool) var do_floor := false setget set_do_floor
 export(bool) var show_map := true setget set_show_map
 export(bool) var show_moisture := false setget set_show_moisture
 export(bool) var show_moisture_h := true setget set_show_moisture_h
-export(float, 0.01, 3) var height = 1 setget set_height
-export(float, 1, 5) var freq1 = 1 setget set_freq1
-export(float, 1, 5) var freq2 = 1 setget set_freq2
-export(float, 1, 5) var freq3 = 1 setget set_freq3
-export(float, 1, 5) var freq4 = 1 setget set_freq4
+export(int, 0, 256) var surface_height = 60 setget set_surface_height
+export(float, 0, 2) var freq1 = 1 setget set_freq1
+export(float, 0, 2) var freq2 = 1 setget set_freq2
+export(float, 0, 2) var freq3 = 1 setget set_freq3
+export(float, 0, 2) var freq4 = 1 setget set_freq4
 export(float, -1, 1) var amp1 = 0.1 setget set_amp1
 export(float, -1, 1) var amp2 = 0.1 setget set_amp2
 export(float, -1, 1) var amp3 = 0.1 setget set_amp3
-export(float, 0, 2) var amp4 = 0.1 setget set_amp4
+export(float, -1, 1) var amp4 = 0.1 setget set_amp4
+export(float, 0.01, 1) var height1 = 1 setget set_height1
+export(float, 0.01, 1) var height2 = 1 setget set_height2
+export(float, 0.01, 1) var height3 = 1 setget set_height3
+export(float, 0.01, 1) var height_m = 1 setget set_height_m
+export(float, 0, 1) var offset1 = 0.5 setget set_offset1
+export(float, 0, 1) var offset2 = 0.5 setget set_offset2
+export(float, 0, 1) var offset3 = 0.5 setget set_offset3
+export(float, 0, 1) var offset_m = 0 setget set_offset_m
 export(float, -1, 1) var mult2 = 0 setget set_mult2
 export(float, -1, 1) var mult3 = 0 setget set_mult3
 export(bool) var enable1 = true setget set_enable1
@@ -50,6 +59,9 @@ export(float, -1, 1) var dist_offsetm setget set_dist_offsetm
 export(bool) var do_update = true setget set_do_update
 export(int, "Custom", "Mountains", "Plains") var mode setget set_mode
 
+var base_layers = []
+var layers = []
+
 func _ready():
 	update()
 
@@ -69,13 +81,15 @@ func set_mode(new_mode):
 
 func custom():
 	if show_map:
-		for i in range(width * radius):
-			for j in range(width * radius):
-				var n = Vector2(i, j) / width - Vector2.ONE * 0.5 * radius
+		for i in range(CHUNK_SIZE * radius):
+			for j in range(CHUNK_SIZE * radius):
+				var n = Vector2(i, j) / CHUNK_SIZE - Vector2.ONE * 0.5 * radius
 				var e : float
 				var color : Color
 				var c : float = 1
-				var m = ease(amp4 * (0.5 + m_noise.get_noise_2dv(freq4 * n) / 2) + dist_offsetm, distm) * 2 - 1
+				var m = amp4 * m_noise.get_noise_2dv(freq4 * n)
+				if use_distm:
+					m = ease(amp4 * (0.5 + m_noise.get_noise_2dv(freq4 * n) / 2) + dist_offsetm, distm) * 2 - 1
 				
 				var e1 = amp1 * (0.5 + e_noise.get_noise_2dv(freq1 * n) / 2)
 				e1 = ease(e1 + dist1_offset, dist1)
@@ -91,9 +105,9 @@ func custom():
 				e3 = ease((e3 + 1) / 2 + dist3_offset, dist3) * 2 - 1
 				
 				e = (
-						(e1 if enable1 else 0) +
-						(e2 if enable2 else 0) +
-						(e3 if enable3 else 0)
+						(e1 * height1 + offset1 if enable1 else 0) +
+						(e2 * height2 + offset2 if enable2 else 0) +
+						(e3 * height3 + offset3 if enable3 else 0)
 					)
 				
 				if use_dist_post:
@@ -103,23 +117,24 @@ func custom():
 				if use_water and e < water:
 					e = water
 				
-				$Map.multimesh.set_instance_color(i + width * radius * j, color)
+				$Map.multimesh.set_instance_color(i + CHUNK_SIZE * radius * j, color)
 				$Map.multimesh.set_instance_transform(
-					i + width * radius * j,
+					i + CHUNK_SIZE * radius * j,
 					Transform().translated(Vector3(
-						i - width * radius / 2,
-						try_floor(e * height * width),
-						j - width * radius / 2
+						i - CHUNK_SIZE * radius / 2,
+						try_floor(e * 256),
+						j - CHUNK_SIZE * radius / 2
 					)))
 	if show_moisture:
-		for i in range(width * radius):
-			for j in range(width * radius):
-				var n = Vector2(i, j) / width - Vector2.ONE * 0.5 * radius
+		for i in range(CHUNK_SIZE * radius):
+			for j in range(CHUNK_SIZE * radius):
+				var n = Vector2(i, j) / CHUNK_SIZE - Vector2.ONE * 0.5 * radius
 				var e : float
 				var color : Color
 				var c : float = 1
 				var m = amp4 * m_noise.get_noise_2dv(freq4 * n)
-				m = ease(m + dist_offsetm, distm)
+				if use_distm:
+					m = ease(m + dist_offsetm, distm)
 				
 				if show_moisture_h:
 					e = m
@@ -128,19 +143,19 @@ func custom():
 					c = (m + 1) / 2
 				color = Color(c, c, c)
 				
-				$MoistureMap.multimesh.set_instance_color(i + width * radius * j, color)
+				$MoistureMap.multimesh.set_instance_color(i + CHUNK_SIZE * radius * j, color)
 				$MoistureMap.multimesh.set_instance_transform(
-					i + width * radius * j,
+					i + CHUNK_SIZE * radius * j,
 					Transform().translated(Vector3(
-						i - width * radius / 2,
-						try_floor(e * height * width),
-						j - width * radius / 2
+						i - CHUNK_SIZE * radius / 2,
+						try_floor(e * height_m * 256 + offset_m),
+						j - CHUNK_SIZE * radius / 2
 					)))
 
 func plains():
-	for i in range(width * radius):
-		for j in range(width * radius):
-			var n = Vector2(i, j) / width - Vector2.ONE * 0.5 * radius
+	for i in range(CHUNK_SIZE * radius):
+		for j in range(CHUNK_SIZE * radius):
+			var n = Vector2(i, j) / CHUNK_SIZE - Vector2.ONE * 0.5 * radius
 			var m = ease(0.1 * (0.5 + m_noise.get_noise_2dv(n) / 2) + 0.454, 1) * 2 - 1
 			
 			var e1 = ease((0.5 + e_noise.get_noise_2dv(7.567 * n) / 2) + 0.02, -8.57)
@@ -155,19 +170,19 @@ func plains():
 			if use_water and e < water:
 				e = water
 			
-			$Map.multimesh.set_instance_color(i + width * radius * j, color)
+			$Map.multimesh.set_instance_color(i + CHUNK_SIZE * radius * j, color)
 			$Map.multimesh.set_instance_transform(
-				i + width * radius * j,
+				i + CHUNK_SIZE * radius * j,
 				Transform().translated(Vector3(
-					i - width * radius / 2,
-					try_floor(e * height * width),
-					j - width * radius / 2
+					i - CHUNK_SIZE * radius / 2,
+					try_floor(e * 256),
+					j - CHUNK_SIZE * radius / 2
 				)))
 
 func mountains():
-	for i in range(width * radius):
-		for j in range(width * radius):
-			var n = Vector2(i, j) / width - Vector2.ONE * 0.5 * radius
+	for i in range(CHUNK_SIZE * radius):
+		for j in range(CHUNK_SIZE * radius):
+			var n = Vector2(i, j) / CHUNK_SIZE - Vector2.ONE * 0.5 * radius
 			var e : float
 			var color : Color
 			var c : float = 1
@@ -185,13 +200,13 @@ func mountains():
 			if use_water and e < water:
 				e = water
 			
-			$Map.multimesh.set_instance_color(i + width * radius * j, color)
+			$Map.multimesh.set_instance_color(i + CHUNK_SIZE * radius * j, color)
 			$Map.multimesh.set_instance_transform(
-				i + width * radius * j,
+				i + CHUNK_SIZE * radius * j,
 				Transform().translated(Vector3(
-					i - width * radius / 2,
-					try_floor(e * height * width),
-					j - width * radius / 2
+					i - CHUNK_SIZE * radius / 2,
+					try_floor(e * 256),
+					j - CHUNK_SIZE * radius / 2
 				)))
 
 func biome(e, m):
@@ -232,20 +247,14 @@ func set_show_moisture_h(new_show_moisture_h):
 	show_moisture_h = new_show_moisture_h
 	update()
 
-func set_width(new_width):
-	width = new_width
-	if has_node("Map"):
-		$Map.multimesh.instance_count = width * width * radius * radius
-		$MoistureMap.multimesh.instance_count = width * width * radius * radius
-	update()
-func set_height(new_height):
-	height = new_height
+func set_surface_height(new_surface_height):
+	surface_height = new_surface_height
 	update()
 func set_radius(new_radius):
 	radius = new_radius
 	if has_node("Map"):
-		$Map.multimesh.instance_count = width * width * radius * radius
-		$MoistureMap.multimesh.instance_count = width * width * radius * radius
+		$Map.multimesh.instance_count = CHUNK_SIZE * CHUNK_SIZE * radius * radius
+		$MoistureMap.multimesh.instance_count = CHUNK_SIZE * CHUNK_SIZE * radius * radius
 	update()
 	
 func set_mult2(new_mult):
@@ -289,6 +298,32 @@ func set_amp3(new_amp):
 	update()
 func set_amp4(new_amp):
 	amp4 = new_amp
+	update()
+
+func set_height1(new_height):
+	height1 = new_height
+	update()
+func set_height2(new_height):
+	height2 = new_height
+	update()
+func set_height3(new_height):
+	height3 = new_height
+	update()
+func set_height_m(new_height):
+	height_m = new_height
+	update()
+
+func set_offset1(new_offset):
+	offset1 = new_offset
+	update()
+func set_offset2(new_offset):
+	offset2 = new_offset
+	update()
+func set_offset3(new_offset):
+	offset3 = new_offset
+	update()
+func set_offset_m(new_offset):
+	offset_m = new_offset
 	update()
 
 func set_dist1(new_dist):
