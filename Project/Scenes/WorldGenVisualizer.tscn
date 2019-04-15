@@ -113,6 +113,12 @@ shape = SubResource( 9 )
 transform = Transform( 5.05, 0, 0, 0, 1, 0, 0, 0, 4.7, 0, 60, 0 )
 shape = SubResource( 10 )
 
-[node name="Camera" type="Camera" parent="."]
-current = true
+[node name="CamOrbit" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 80.787, 0 )
 script = ExtResource( 2 )
+
+[node name="Camera" type="Camera" parent="CamOrbit"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10 )
+current = true
+far = 400.0
+
