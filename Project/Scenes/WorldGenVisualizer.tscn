@@ -118,7 +118,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 80.787, 0 )
 script = ExtResource( 2 )
 
 [node name="Camera" type="Camera" parent="CamOrbit"]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 60 )
 current = true
 far = 400.0
-

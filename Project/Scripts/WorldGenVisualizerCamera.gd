@@ -3,10 +3,11 @@ extends Spatial
 var anchor := Vector3(0, 60, 0)
 var rotating := false
 var offset := Vector3.BACK * 80
+var rot_x = 0
+var rot_y = 0
 
 func _process(delta):
-	#translation = anchor + offset
-	pass
+	translation.y += delta * 50 * (int(Input.is_key_pressed(KEY_SPACE)) - int(Input.is_key_pressed(KEY_R)))
 
 func _input(event):
 	if event is InputEventMouseButton:
@@ -22,11 +23,9 @@ func _input(event):
 					$Camera.translation.z += 1
 					
 	elif event is InputEventMouseMotion and rotating:
-		rotate_y(-event.relative.x * 0.005)
-		$Camera.rotate(transform.basis.x, -event.relative.y * 0.005)
-	elif event is InputEventKey and event.pressed:
-		match event.scancode:
-			KEY_SPACE:
-				anchor.y += 1
-			KEY_R:
-				anchor.y -= 1
+		rot_x -= event.relative.x * 0.005
+		rot_y -= event.relative.y * 0.005
+		
+		transform.basis = Basis()
+		rotate_object_local(Vector3.UP, rot_x)
+		rotate_object_local(Vector3.RIGHT, rot_y)
