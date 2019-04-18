@@ -1,7 +1,7 @@
 [gd_scene load_steps=13 format=2]
 
-[ext_resource path="res://Scripts/WorldGenVisualizer.gd" type="Script" id=1]
-[ext_resource path="res://Scripts/WorldGenVisualizerCamera.gd" type="Script" id=2]
+[ext_resource path="res://Scripts/WorldGenTool/WorldGenTool.gd" type="Script" id=1]
+[ext_resource path="res://Scripts/WorldGenTool/WorldGenToolCamera.gd" type="Script" id=2]
 
 [sub_resource type="OpenSimplexNoise" id=1]
 period = 2.0
@@ -74,7 +74,6 @@ enable2 = true
 enable3 = true
 snow = 0.951
 stone = 0.9
-use_water = false
 water = 0.205
 deep_water = 0.133
 beach = 0.21
@@ -121,3 +120,28 @@ script = ExtResource( 2 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 60 )
 current = true
 far = 400.0
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer"]
+anchor_right = 0.3
+anchor_bottom = 1.0
+custom_constants/margin_right = 10
+custom_constants/margin_top = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/MarginContainer"]
+margin_top = 10.0
+margin_right = 297.0
+margin_bottom = 600.0
+alignment = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/MarginContainer/HBoxContainer"]
+margin_left = 277.0
+margin_top = 288.0
+margin_right = 277.0
+margin_bottom = 302.0
+
+[node name="HSlider" type="HSlider" parent="CanvasLayer/MarginContainer/HBoxContainer"]
+margin_left = 281.0
+margin_right = 297.0
+margin_bottom = 16.0
