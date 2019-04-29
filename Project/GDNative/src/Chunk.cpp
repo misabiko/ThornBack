@@ -98,10 +98,10 @@ void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Ve
 	for (const unsigned& i : newIndices)
 		surface.indices.push_back(surface.vertices.size() + i);
 
-	surface.uvs.push_back(Vector2(0, 0));
-	surface.uvs.push_back(Vector2(w, 0));
 	surface.uvs.push_back(Vector2(0, h));
 	surface.uvs.push_back(Vector2(w, h));
+	surface.uvs.push_back(Vector2(0, 0));
+	surface.uvs.push_back(Vector2(w, 0));
 
 	for (int i = 0; i < 4; i++)
 		surface.normals.push_back(normal);
@@ -123,7 +123,7 @@ void Chunk::updateMesh() {
 		arrays[Mesh::ARRAY_INDEX] = surface.indices;
 
 		mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, arrays);
-		mesh->surface_set_material(mesh->get_surface_count() - 1, blockLibrary->get(material).material);
+		mesh->surface_set_material(mesh->get_surface_count() - 1, blockLibrary->getMaterial(material));
 	}
 }
 
@@ -201,18 +201,18 @@ void Chunk::collisionMesher() {
 					staticBody->shape_owner_set_transform(shapeOwner, Transform().translated(pos + cubeSize * 0.5f));
 					staticBody->shape_owner_add_shape(shapeOwner, box);
 
-					addCube(pos, cubeSize, worldData->getBlock(coords, i, j, k)->type);
+					addCube(pos, cubeSize, blockLibrary->get(worldData->getBlock(coords, i, j, k)->type));
 				}
 }
 
-void Chunk::addCube(Vector3 origin, Vector3 size, unsigned type) {
+void Chunk::addCube(Vector3 origin, Vector3 size, const BlockLibrary::TypeData& type) {
 	addQuad(
 		origin + Vector3(0,			0,			size.z),
 		origin + Vector3(0,			size.y,		size.z),
 		origin + Vector3(size.x,	size.y,		size.z),
 		origin + Vector3(size.x,	0,			size.z),
 		size.x, size.y,
-		type, SOUTH
+		type.materials[0], SOUTH
 	);
 	
 	addQuad(
@@ -221,7 +221,7 @@ void Chunk::addCube(Vector3 origin, Vector3 size, unsigned type) {
 		origin + Vector3(size.x,	size.y,		0),
 		origin + Vector3(size.x,	0,			0),
 		size.x, size.y,
-		type, NORTH
+		type.materials[1], NORTH
 	);
 	
 	addQuad(
@@ -230,7 +230,7 @@ void Chunk::addCube(Vector3 origin, Vector3 size, unsigned type) {
 		origin + Vector3(0,			size.y,		size.z),
 		origin + Vector3(0,			0,			size.z),
 		size.z, size.y,
-		type, WEST
+		type.materials[2], WEST
 	);
 	
 	addQuad(
@@ -239,7 +239,7 @@ void Chunk::addCube(Vector3 origin, Vector3 size, unsigned type) {
 		origin + Vector3(size.x,	size.y,		size.z),
 		origin + Vector3(size.x,	0,			size.z),
 		size.z, size.y,
-		type, EAST
+		type.materials[3], EAST
 	);
 	
 	addQuad(
@@ -248,7 +248,7 @@ void Chunk::addCube(Vector3 origin, Vector3 size, unsigned type) {
 		origin + Vector3(size.x,	0,		size.z),
 		origin + Vector3(size.x,	0,			0),
 		size.x, size.z,
-		type, BOTTOM
+		type.materials[4], BOTTOM
 	);
 	
 	addQuad(
@@ -257,6 +257,6 @@ void Chunk::addCube(Vector3 origin, Vector3 size, unsigned type) {
 		origin + Vector3(size.x,	size.y,		size.z),
 		origin + Vector3(size.x,	size.y,			0),
 		size.x, size.z,
-		type, TOP
+		type.materials[5], TOP
 	);
 }

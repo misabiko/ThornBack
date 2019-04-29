@@ -11,23 +11,32 @@ namespace godot {
 	class BlockLibrary : public Resource {
 		GODOT_CLASS(BlockLibrary, Resource)
 
+		std::vector<Ref<SpatialMaterial>> materials;
+
+		public:
 		struct TypeData {
 			String name;
-			Ref<SpatialMaterial> material;
+
+			unsigned materials[6];
+			bool multiTextured;
 			bool opaque;
 			bool colored;
 			static const int64_t flags = Texture::FLAG_MIPMAPS | Texture::FLAG_REPEAT;
 
-			TypeData(String name, Ref<StreamTexture> texture, const bool& opaque = true, const bool& colored = false) {
-				this->name = name;
-				this->opaque = opaque;
-				this->colored = colored;
+			TypeData(String name, const unsigned& texture) : TypeData(name, texture, texture, texture, texture, texture, texture) {}
 
-				material.instance();
-				material->set_texture(SpatialMaterial::TEXTURE_ALBEDO, texture);
-			}
+			TypeData(String name, const unsigned& texSouth, const unsigned& texNorth, const unsigned& texWest, const unsigned& texEast, const unsigned& texBottom, const unsigned& texTop)
+				: name(name), multiTextured(true) {
+					materials[0] = texSouth;
+					materials[1] = texNorth;
+					materials[2] = texWest;
+					materials[3] = texEast;
+					materials[4] = texBottom;
+					materials[5] = texTop;
+				}
 		};
 
+		private:
 		std::vector<TypeData> types;
 		Array textures;
 		
@@ -35,6 +44,8 @@ namespace godot {
 		~BlockLibrary();
 		
 		TypeData& get(unsigned idx);
+
+		Ref<SpatialMaterial> getMaterial(const unsigned& idx);
 
 		void set_textures(Array textures);
 

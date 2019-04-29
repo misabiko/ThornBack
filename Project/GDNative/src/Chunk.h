@@ -64,7 +64,7 @@ namespace godot {
 
 		void addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, unsigned type, Direction side);
 
-		void addCube(Vector3 origin, Vector3 size, unsigned type);
+		void addCube(Vector3 origin, Vector3 size, const BlockLibrary::TypeData &type);
 
 		void collisionMesher();
 	};

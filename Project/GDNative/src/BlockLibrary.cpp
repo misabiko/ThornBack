@@ -12,16 +12,27 @@ BlockLibrary::TypeData& BlockLibrary::get(unsigned idx) {
 	return types[idx - 1];
 }
 
+Ref<SpatialMaterial> BlockLibrary::getMaterial(const unsigned& idx) {
+	return materials[idx];
+}
+
 void BlockLibrary::set_textures(Array textures) {
 	this->textures = textures;
-	types.emplace_back("Dirt", textures[0]);
-	types.emplace_back("Stone", textures[1]);
-	types.emplace_back("Cobblestone", textures[2]);
-	types.emplace_back("Grass", textures[3]);
+
+	materials.resize(textures.size());
+	for (int i = 0; i < textures.size(); i++) {
+		materials[i].instance();
+		materials[i]->set_texture(SpatialMaterial::TEXTURE_ALBEDO, textures[i]);
+	}
+
+	types.emplace_back("Dirt", 0);
+	types.emplace_back("Stone", 1);
+	types.emplace_back("Cobblestone", 2);
+	types.emplace_back("Grass", 4, 4, 4, 4, 0, 3);
 	//Color(0, 0.52, 0.125, 1)
-	types.emplace_back("Sand", textures[4]);
-	types.emplace_back("Gravel", textures[5]);
-	types.emplace_back("Wool", textures[6]);
+	types.emplace_back("Sand", 5);
+	types.emplace_back("Gravel", 6);
+	types.emplace_back("Wool", 7);
 }
 
 Array BlockLibrary::get_textures() {
