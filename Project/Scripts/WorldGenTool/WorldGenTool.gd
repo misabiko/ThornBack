@@ -63,6 +63,7 @@ var base_layers = []
 var layers = []
 
 func _ready():
+	print(get_path())
 	update()
 
 func update():

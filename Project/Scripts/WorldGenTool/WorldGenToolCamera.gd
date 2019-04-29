@@ -17,10 +17,10 @@ func _input(event):
 				Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED if rotating else Input.MOUSE_MODE_VISIBLE)
 			BUTTON_WHEEL_UP:
 				if event.pressed and $Camera.translation.z > 5:
-					$Camera.translation.z -= 1
+					$Camera.translation.z -= 3
 			BUTTON_WHEEL_DOWN:
 				if event.pressed:
-					$Camera.translation.z += 1
+					$Camera.translation.z += 3
 					
 	elif event is InputEventMouseMotion and rotating:
 		rot_x -= event.relative.x * 0.005
