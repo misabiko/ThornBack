@@ -35,10 +35,10 @@ void WorldData::tryInit(const std::pair<int, int>& chunk) {
 
 			y = std::floor(std::clamp<double>((e + 3) * 15.3, 0, 127));
 
-			getBlock(it.first, x, y, z)->set(1, true);
+			getBlock(it.first, x, y, z)->set(4, true);
 
 			for (int j = 0; j < y; j++)
-				getBlock(it.first, x, j, z)->set(2, true);
+				getBlock(it.first, x, j, z)->set(1, true);
 		}
 }
 

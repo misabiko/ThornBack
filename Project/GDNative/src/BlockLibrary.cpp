@@ -25,14 +25,14 @@ void BlockLibrary::set_textures(Array textures) {
 		materials[i]->set_texture(SpatialMaterial::TEXTURE_ALBEDO, textures[i]);
 	}
 
-	types.emplace_back("Dirt", 0);
-	types.emplace_back("Stone", 1);
-	types.emplace_back("Cobblestone", 2);
-	types.emplace_back("Grass", 4, 4, 4, 4, 0, 3);
+	types.emplace_back("Dirt", 0);					//1
+	types.emplace_back("Stone", 1);					//2
+	types.emplace_back("Cobblestone", 2);			//3
+	types.emplace_back("Grass", 4, 4, 4, 4, 0, 3);	//4
 	//Color(0, 0.52, 0.125, 1)
-	types.emplace_back("Sand", 5);
-	types.emplace_back("Gravel", 6);
-	types.emplace_back("Wool", 7);
+	types.emplace_back("Sand", 5);					//5
+	types.emplace_back("Gravel", 6);				//6
+	types.emplace_back("Wool", 7);					//7
 }
 
 Array BlockLibrary::get_textures() {
