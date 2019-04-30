@@ -4,6 +4,8 @@
 
 using namespace godot;
 
+bool Chunk::wireframe = false;
+
 void Chunk::_register_methods() {
 	register_method("init", &Chunk::init);
 	register_method("update_mesh", &Chunk::updateMesh);
@@ -11,6 +13,8 @@ void Chunk::_register_methods() {
 	register_method("_ready", &Chunk::_ready);
 	register_method("set_block", &Chunk::setBlock);
 	register_method("clear_block", &Chunk::clearBlock);
+
+	register_property<Chunk, bool>("use_wireframe", &Chunk::setWireframe, &Chunk::getWireframe, false);
 }
 
 void Chunk::_init() {}
@@ -26,9 +30,11 @@ void Chunk::_ready() {
 }
 
 void Chunk::_process(float delta) {
-	collisionMesher();
+	if (mustRemesh)
+		collisionMesher();
 	updateMesh();
 
+	mustRemesh = false;
 	set_process(false);
 }
 
@@ -55,65 +61,22 @@ void Chunk::init(int x, int y, Ref<WorldData> worldData, Ref<BlockLibrary> block
 void Chunk::setBlock(const unsigned x, const unsigned y, const unsigned z, const unsigned type) {
 	worldData->getBlock(coords, x, y, z)->set(type, true);
 
+	mustRemesh = true;
 	set_process(true);
 }
 
 void Chunk::clearBlock(const unsigned x, const unsigned y, const unsigned z) {
 	worldData->getBlock(coords, x, y, z)->set(0, false);
 
+	mustRemesh = true;
 	set_process(true);
-}
-
-void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, unsigned type, Direction side) {
-	SurfaceData& surface = surfaces[type];
-
-	Vector3 normal;
-	switch (side) {
-		case NORTH:
-			normal = Vector3(0, 0, -1);
-		break;
-		case SOUTH:
-			normal = Vector3(0, 0, 1);
-		break;
-		case EAST:
-			normal = Vector3(1, 0, 0);
-		break;
-		case WEST:
-			normal = Vector3(-1, 0, 0);
-		break;
-		case TOP:
-			normal = Vector3(0, 1, 0);
-		break;
-		case BOTTOM:
-			normal = Vector3(0, -1, 0);
-		break;
-	}
-
-	std::array<int, 6> newIndices;
-	if (side % 2)
-		newIndices = {2,3,1, 1,0,2};
-	else
-		newIndices = {2,0,1, 1,3,2};
-
-	for (const unsigned& i : newIndices)
-		surface.indices.push_back(surface.vertices.size() + i);
-
-	surface.uvs.push_back(Vector2(0, h));
-	surface.uvs.push_back(Vector2(w, h));
-	surface.uvs.push_back(Vector2(0, 0));
-	surface.uvs.push_back(Vector2(w, 0));
-
-	for (int i = 0; i < 4; i++)
-		surface.normals.push_back(normal);
-
-	surface.vertices.push_back(bottom_left);
-	surface.vertices.push_back(bottom_right);
-	surface.vertices.push_back(top_left);
-	surface.vertices.push_back(top_right);
 }
 
 void Chunk::updateMesh() {
 	Ref<ArrayMesh> mesh = get_mesh();
+	while (mesh->get_surface_count())
+		mesh->surface_remove(0);
+
 	for (auto& [material, surface] : surfaces) {
 		Array arrays;
 		arrays.resize(Mesh::ARRAY_MAX);
@@ -122,17 +85,14 @@ void Chunk::updateMesh() {
 		arrays[Mesh::ARRAY_TEX_UV] = surface.uvs;
 		arrays[Mesh::ARRAY_INDEX] = surface.indices;
 
-		mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, arrays);
+		mesh->add_surface_from_arrays(wireframe ? Mesh::PRIMITIVE_LINES : Mesh::PRIMITIVE_TRIANGLES, arrays);
 		mesh->surface_set_material(mesh->get_surface_count() - 1, blockLibrary->getMaterial(material));
 	}
 }
 
 void Chunk::collisionMesher() {
 	{
-		Ref<ArrayMesh> mesh = get_mesh();
-		while (mesh->get_surface_count())
-			mesh->surface_remove(0);
-		for (auto& [material, surface] : surfaces)
+		for (auto &[material, surface] : surfaces)
 			surface.clear();
 		
 		Array owners = staticBody->get_shape_owners();
@@ -205,6 +165,65 @@ void Chunk::collisionMesher() {
 				}
 }
 
+void Chunk::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, unsigned type, Direction side) {
+	SurfaceData& surface = surfaces[type];
+
+	Vector3 normal;
+	switch (side) {
+		case NORTH:
+			normal = Vector3(0, 0, -1);
+		break;
+		case SOUTH:
+			normal = Vector3(0, 0, 1);
+		break;
+		case EAST:
+			normal = Vector3(1, 0, 0);
+		break;
+		case WEST:
+			normal = Vector3(-1, 0, 0);
+		break;
+		case TOP:
+			normal = Vector3(0, 1, 0);
+		break;
+		case BOTTOM:
+			normal = Vector3(0, -1, 0);
+		break;
+	}
+
+	if (wireframe) {
+		std::array<int, 14> newIndices;
+		if (side % 2)
+			newIndices = {2,3,1,2, 1,0,2,1};
+		else
+			newIndices = {2,0,1,2, 1,3,2,1};
+
+		for (const unsigned& i : newIndices)
+			surface.indices.push_back(surface.vertices.size() + i);
+	}else {
+		std::array<int, 6> newIndices;
+		if (side % 2)
+			newIndices = {2,3,1, 1,0,2};
+		else
+			newIndices = {2,0,1, 1,3,2};
+
+		for (const unsigned& i : newIndices)
+			surface.indices.push_back(surface.vertices.size() + i);
+	}
+
+	surface.uvs.push_back(Vector2(0, h));
+	surface.uvs.push_back(Vector2(w, h));
+	surface.uvs.push_back(Vector2(0, 0));
+	surface.uvs.push_back(Vector2(w, 0));
+
+	for (int i = 0; i < 4; i++)
+		surface.normals.push_back(normal);
+
+	surface.vertices.push_back(bottom_left);
+	surface.vertices.push_back(bottom_right);
+	surface.vertices.push_back(top_left);
+	surface.vertices.push_back(top_right);
+}
+
 void Chunk::addCube(Vector3 origin, Vector3 size, const BlockLibrary::TypeData& type) {
 	addQuad(
 		origin + Vector3(0,			0,			size.z),
@@ -259,4 +278,13 @@ void Chunk::addCube(Vector3 origin, Vector3 size, const BlockLibrary::TypeData& 
 		size.x, size.z,
 		type.materials[5], TOP
 	);
+}
+
+void Chunk::setWireframe(bool wireframe) {
+	this->wireframe = wireframe;
+	set_process(true);
+}
+
+bool Chunk::getWireframe() {
+	return wireframe;
 }

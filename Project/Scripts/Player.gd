@@ -23,6 +23,7 @@ signal stop_breaking
 
 var vel = Vector3()
 var flying : bool = false
+var grounded : bool = false
 
 var block_type = 1
 var schedule_chunks : bool = true
@@ -33,7 +34,7 @@ func _ready():
 	
 	$DebugHelper.add_method("Position", "debug_get_pos", get_path())
 	$DebugHelper.add_method("Chunk", "get_chunk_coords", get_path())
-	$DebugHelper.add_method("is_on_floor", "is_on_floor", get_path())
+	$DebugHelper.add_property("grounded", get_path())
 	$DebugHelper.add_property("breaking_stage", get_path())
 	$DebugHelper.add_property("flying", get_path())
 	$DebugHelper.add_property("block_type", get_path())
@@ -75,7 +76,7 @@ func process_inputs(delta):
 	vel.x = move.x
 	vel.z = move.z
 
-	if Input.is_key_pressed(KEY_SPACE) && is_on_floor() && vel.y <= 0:
+	if Input.is_key_pressed(KEY_SPACE) && grounded && vel.y <= 0:
 		vel.y += JUMP_FORCE
 	else:
 		vel.y += GRAVITY * delta
@@ -83,6 +84,7 @@ func process_inputs(delta):
 	if vel:
 		var old_coords = get_chunk_coords()
 		vel = move_and_slide(vel, Vector3.UP)
+		grounded = is_on_floor()
 		
 		var new_coords = get_chunk_coords()
 		if schedule_chunks and new_coords != old_coords:

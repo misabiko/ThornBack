@@ -45,6 +45,8 @@ namespace godot {
 		public:
 		Ref<WorldData> worldData;
 		StaticBody* staticBody;
+		bool mustRemesh;
+		static bool wireframe;
 
 		static void _register_methods();
 
@@ -67,6 +69,10 @@ namespace godot {
 		void addCube(Vector3 origin, Vector3 size, const BlockLibrary::TypeData &type);
 
 		void collisionMesher();
+
+		void setWireframe(bool wireframe);
+
+		bool getWireframe();
 	};
 }
 

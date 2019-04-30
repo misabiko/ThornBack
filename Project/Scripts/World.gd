@@ -39,3 +39,6 @@ func _input(event):
 				$ChunkLoader.save()
 			KEY_U:
 				$ChunkLoader.load_chunks = !$ChunkLoader.load_chunks
+			KEY_O:
+				for chunk in $ChunkLoader.get_children():
+					chunk.use_wireframe = !chunk.use_wireframe
