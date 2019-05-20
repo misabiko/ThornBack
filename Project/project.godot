@@ -69,6 +69,10 @@ texture={
 "svg/scale": 1.0
 }
 
+[layer_names]
+
+3d_physics/layer_2="Entity"
+
 [rendering]
 
 threads/thread_model=2

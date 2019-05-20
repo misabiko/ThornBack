@@ -66,6 +66,13 @@ func _ready():
 	$MeshInstance.mesh = surfaceTool.commit()
 	material_override.albedo_color = Color(1, 1, 1, 0)
 
+func collides(offset):
+	$Area.translation = translation + offset;
+	print($Area.translation)
+	print(!$Area.get_overlapping_bodies().empty())
+	print("\n")
+	return !$Area.get_overlapping_bodies().empty()
+
 func _on_Player_start_breaking():
 	breaking_stage = 0
 	material_override.albedo_texture = textures[breaking_stage]
