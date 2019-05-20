@@ -130,7 +130,8 @@ func _input(event):
 							start_breaking()
 				BUTTON_RIGHT:
 					update_selection_highlight()
-					if aimed_collider:
+					
+					if aimed_collider and !$"../SelectionHighlight".collides(selected_normal):
 						$"..".add_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal, block_type)
 				BUTTON_WHEEL_UP:
 					if block_type != 6:
