@@ -14,6 +14,9 @@ var textures = [
 	preload("res://newstart_textures/assets/minecraft/textures/blocks/destroy_stage_9.png")
 ]
 
+onready var areas = [$AreaUp, $AreaBottom, $AreaRight, $AreaLeft, $AreaFront, $AreaRear]
+var direction
+
 func _ready():
 	var surfaceTool = SurfaceTool.new()
 	surfaceTool.begin(Mesh.PRIMITIVE_LINES)
@@ -66,12 +69,47 @@ func _ready():
 	$MeshInstance.mesh = surfaceTool.commit()
 	material_override.albedo_color = Color(1, 1, 1, 0)
 
-func collides(offset):
-	$Area.translation = translation + offset;
-	print($Area.translation)
-	print(!$Area.get_overlapping_bodies().empty())
-	print("\n")
-	return !$Area.get_overlapping_bodies().empty()
+func update(raycast_result):
+	var old_translation = translation
+	
+	if !raycast_result.empty():
+		translation = (raycast_result.position - raycast_result.normal * 0.2).floor() + Vector3(0.5, 0.5, 0.5)
+		visible = true
+		var selected_normal = (raycast_result.normal * 0.8).round().normalized()
+		if selected_normal.y >= 0.8:
+			direction = 0
+		elif selected_normal.y <= -0.8:
+			direction = 1
+		elif selected_normal.x >= 0.8:
+			direction = 2
+		elif selected_normal.x <= -0.8:
+			direction = 3
+		elif selected_normal.z >= 0.8:
+			direction = 5
+		elif selected_normal.z <= -0.8:
+			direction = 4
+	else:
+		visible = false
+	
+	return old_translation != translation
+
+func collides():
+	return !areas[direction].get_overlapping_bodies().empty()
+
+func get_normal():
+	match direction:
+		0:
+			return Vector3.UP
+		1:
+			return Vector3.DOWN
+		2:
+			return Vector3.RIGHT
+		3:
+			return Vector3.LEFT
+		4:
+			return Vector3.FORWARD
+		5:
+			return Vector3.BACK
 
 func _on_Player_start_breaking():
 	breaking_stage = 0

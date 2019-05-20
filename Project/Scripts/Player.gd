@@ -5,13 +5,12 @@ const JUMP_FORCE = 8
 const FLY_SPEED = 8
 const GRAVITY = -30
 
-var screen_center
+onready var screen_center = get_viewport().size / 2
 var RAY_LENGTH : int = 6
-var raycast_exceptions
+var raycast_exceptions = [self]
 export (NodePath) var selection_highlight_nodepath
 onready var selection_highlight = get_node(selection_highlight_nodepath)
 var aimed_collider
-var selected_normal
 
 var breaking : bool = false
 var breaking_stage : int = 0
@@ -29,9 +28,6 @@ var block_type = 1
 var schedule_chunks : bool = true
 
 func _ready():
-	screen_center = get_viewport().size / 2
-	raycast_exceptions = [self]
-	
 	$DebugHelper.add_method("Position", "debug_get_pos", get_path())
 	$DebugHelper.add_method("Chunk", "get_chunk_coords", get_path())
 	$DebugHelper.add_property("grounded", get_path())
@@ -52,7 +48,7 @@ func _physics_process(delta):
 	else:
 		process_inputs(delta)
 	
-	if update_selection_highlight():
+	if check_raycast():
 		stop_breaking()
 
 func process_inputs(delta):
@@ -122,17 +118,17 @@ func _input(event):
 		if event.is_pressed():
 			match event.button_index:
 				BUTTON_LEFT:
-					update_selection_highlight()
+					check_raycast()
 					if aimed_collider:
 						if flying:
 							$"..".remove_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
 						else:
 							start_breaking()
 				BUTTON_RIGHT:
-					update_selection_highlight()
+					check_raycast()
 					
-					if aimed_collider and !$"../SelectionHighlight".collides(selected_normal):
-						$"..".add_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selected_normal, block_type)
+					if aimed_collider and !selection_highlight.collides():
+						$"..".add_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selection_highlight.get_normal(), block_type)
 				BUTTON_WHEEL_UP:
 					if block_type != 6:
 						block_type += 1
@@ -166,22 +162,15 @@ func _input(event):
 					schedule_chunks = !schedule_chunks
 
 #Returns true if selected block changed or none is selected
-func update_selection_highlight():
-	var old_translation = selection_highlight.translation
+func check_raycast():
 	var space_state = get_world().direct_space_state
 	var from = $Camera.project_ray_origin(screen_center)
 	var result = space_state.intersect_ray(from, from + $Camera.project_ray_normal(screen_center) * RAY_LENGTH, raycast_exceptions)
 	
-	if !result.empty():
-		selection_highlight.translation = (result.position - result.normal * 0.2).floor() + Vector3(0.5, 0.5, 0.5)
-		selection_highlight.visible = true
-		aimed_collider = result.collider
-		selected_normal = (result.normal * 0.8).round().normalized()
-	else:
-		selection_highlight.visible = false
-		aimed_collider = null
+	var moved = selection_highlight.update(result)
+	aimed_collider = result.collider if !result.empty() else null
 	
-	return aimed_collider == null or old_translation != selection_highlight.translation
+	return aimed_collider == null or moved
 
 func _on_BreakTimer_timeout():
 	if breaking_stage == 9:
