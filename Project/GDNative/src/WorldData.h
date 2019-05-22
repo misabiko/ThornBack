@@ -39,6 +39,8 @@ namespace godot {
 		public:		
 		BlockData* getBlock(const std::pair<int, int>& chunk, const int& x, const int& y, const int& z);
 
+		unsigned getBlockType(const int chunkX, const int chunkY, const int x, const int y, const int z);
+
 		void tryInit(const std::pair<int, int>& chunk);
 
 		double ease(double s, double curve);

@@ -46,7 +46,6 @@ texture = ExtResource( 4 )
 script = ExtResource( 5 )
 world_data = SubResource( 1 )
 block_library = SubResource( 2 )
-
 [connection signal="enter_chunk" from="Player" to="ChunkLoader" method="update_chunk_loadings"]
 [connection signal="start_breaking" from="Player" to="SelectionHighlight" method="_on_Player_start_breaking"]
 [connection signal="step_breaking" from="Player" to="SelectionHighlight" method="_on_Player_step_breaking"]

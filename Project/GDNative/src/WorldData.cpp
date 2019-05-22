@@ -12,6 +12,10 @@ WorldData::BlockData* WorldData::getBlock(const std::pair<int, int>& chunk, cons
 	return &chunks.at(chunk).at(x + CHUNK_SIZE * y + CHUNK_SIZE * WORLD_HEIGHT * z);
 }
 
+unsigned WorldData::getBlockType(const int chunkX, const int chunkY, const int x, const int y, const int z) {
+    return chunks.at(std::pair<int, int>(chunkX, chunkY)).at(x + CHUNK_SIZE * y + CHUNK_SIZE * WORLD_HEIGHT * z).type;
+}
+
 void WorldData::tryInit(const std::pair<int, int>& chunk) {
 	if (chunks.find(chunk) != chunks.end())
 		return;
@@ -137,4 +141,6 @@ void WorldData::_init() {
 	noiseM->set_period(1);
 }
 
-void WorldData::_register_methods() {}
+void WorldData::_register_methods() {
+    register_method("get_block_type", &WorldData::getBlockType);
+}

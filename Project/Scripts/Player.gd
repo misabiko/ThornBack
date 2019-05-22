@@ -24,7 +24,6 @@ var vel = Vector3()
 var flying : bool = false
 var grounded : bool = false
 
-var block_type = 1
 var schedule_chunks : bool = true
 
 func _ready():
@@ -33,7 +32,6 @@ func _ready():
 	$DebugHelper.add_property("grounded", get_path())
 	$DebugHelper.add_property("breaking_stage", get_path())
 	$DebugHelper.add_property("flying", get_path())
-	$DebugHelper.add_property("block_type", get_path())
 	$DebugHelper.add_property("schedule_chunks", get_path())
 
 func debug_get_pos():
@@ -119,6 +117,7 @@ func _input(event):
 			match event.button_index:
 				BUTTON_LEFT:
 					check_raycast()
+					
 					if aimed_collider:
 						if flying:
 							$"..".remove_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
@@ -127,14 +126,10 @@ func _input(event):
 				BUTTON_RIGHT:
 					check_raycast()
 					
-					if aimed_collider and !selection_highlight.collides():
-						$"..".add_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selection_highlight.get_normal(), block_type)
-				BUTTON_WHEEL_UP:
-					if block_type != 6:
-						block_type += 1
-				BUTTON_WHEEL_DOWN:
-					if block_type != 1:
-						block_type -= 1
+					if $Inventory.getSelectedType() == $Inventory.ItemTypes.PLACEABLE:
+						if aimed_collider and !selection_highlight.collides():
+							$"..".add_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selection_highlight.get_normal(), $Inventory.getSelectedId())
+							$Inventory.removeSelectedItem(1)
 		else:
 			match event.button_index:
 				BUTTON_LEFT:
@@ -174,7 +169,9 @@ func check_raycast():
 
 func _on_BreakTimer_timeout():
 	if breaking_stage == 9:
-		$"..".remove_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5))
+		var pos = selection_highlight.translation - Vector3(0.5, 0.5, 0.5)
+		$Inventory.addItem($"..".get_block_id(pos), 1)
+		$"..".remove_block(pos)
 		stop_breaking()
 	else:
 		breaking_stage += 1

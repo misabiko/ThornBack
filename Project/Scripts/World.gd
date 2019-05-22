@@ -25,12 +25,17 @@ func world_to_chunk(pos):
 	)
 
 func add_block(pos, type):
-	var selectedPos = world_to_chunk(pos)
-	get_node(get_chunk(pos)).set_block(selectedPos.x, selectedPos.y, selectedPos.z, type)
+	var selected_pos = world_to_chunk(pos)
+	get_node(get_chunk(pos)).set_block(selected_pos.x, selected_pos.y, selected_pos.z, type)
 
 func remove_block(pos):
-	var selectedPos = world_to_chunk(pos)
-	get_node(get_chunk(pos)).clear_block(selectedPos.x, selectedPos.y, selectedPos.z)
+	var selected_pos = world_to_chunk(pos)
+	get_node(get_chunk(pos)).clear_block(selected_pos.x, selected_pos.y, selected_pos.z)
+
+func get_block_id(pos):
+	var chunk_coords = get_chunk_coords(pos)
+	var selected_pos = world_to_chunk(pos)
+	return $ChunkLoader.world_data.get_block_type(chunk_coords.x, chunk_coords.y, selected_pos.x, selected_pos.y, selected_pos.z)
 
 func _input(event):
 	if event is InputEventKey and event.is_pressed():
