@@ -171,7 +171,7 @@ func _on_BreakTimer_timeout():
 	if breaking_stage == 9:
 		var pos = selection_highlight.translation - Vector3(0.5, 0.5, 0.5)
 		$Inventory.addItem($"..".get_block_id(pos), 1)
-		$"..".remove_block(pos)
+		$"..".break_block(pos)
 		stop_breaking()
 	else:
 		breaking_stage += 1

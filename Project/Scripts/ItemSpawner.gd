@@ -8,9 +8,9 @@ func _input(event):
 			KEY_H:
 				spawn_block(1, $"../Player".translation - $"../Player".get_global_transform().basis.z)
 
-func spawn_block(type, pos):
+func spawn_block(type, coord):
 	var item = Item.instance()
 	item.get_node("MeshInstance").mesh = CubeMesh.new()
-	item.translation = pos
+	item.translation = coord + Vector3(0.5, 0.5, 0.5)
 	add_child(item)
 	print("pop")
