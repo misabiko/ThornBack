@@ -1,11 +1,12 @@
 extends Node
 
 var slots : Array
-var selected_slot : int = 0
+var selected_slot : int = 0 setget set_selected_slot
 var SLOT_COUNT = 9*4
 
 enum ItemTypes {EMPTY, PLACEABLE, REUSEABLE, DISPOSABLE}
 signal slot_updated(slot, id, count)
+signal changed_selected_slot(last_slot, new_slot)
 
 func _ready():
 	$"../DebugHelper".add_property("selected_slot", get_path())
@@ -21,20 +22,28 @@ func _ready():
 		}
 
 func addItem(id, count):
-	var empty_slot = -1
-	
-	for i in range(SLOT_COUNT):
-		if slots[i].id == id:
-			slots[i].count += count
-			emit_signal("slot_updated", i, id, slots[i].count)
-			return
-		elif empty_slot == -1 and slots[i].id == -1:
-			empty_slot = i
-	
-	if empty_slot != -1:
-		slots[empty_slot].id = id
-		slots[empty_slot].count = count
-		emit_signal("slot_updated", empty_slot, id, count)
+	if slots[selected_slot].id == -1:
+		slots[selected_slot].id = id
+		slots[selected_slot].count = count
+		emit_signal("slot_updated", selected_slot, id, count)
+	elif slots[selected_slot].id == id:
+		slots[selected_slot].count += count
+		emit_signal("slot_updated", selected_slot, id, slots[selected_slot].count)
+	else:
+		var empty_slot = -1
+		
+		for i in range(SLOT_COUNT):
+			if slots[i].id == id:
+				slots[i].count += count
+				emit_signal("slot_updated", i, id, slots[i].count)
+				return
+			elif empty_slot == -1 and slots[i].id == -1:
+				empty_slot = i
+		
+		if empty_slot != -1:
+			slots[empty_slot].id = id
+			slots[empty_slot].count = count
+			emit_signal("slot_updated", empty_slot, id, count)
 
 func removeItem(slot, count):
 	if slots[slot].count > count:
@@ -65,8 +74,31 @@ func _input(event):
 	if event is InputEventMouseButton and event.is_pressed():
 		match event.button_index:
 			BUTTON_WHEEL_UP:
-				if selected_slot != 9:
-					selected_slot += 1
+				set_selected_slot(selected_slot + 1 if selected_slot != 8 else 0)
 			BUTTON_WHEEL_DOWN:
-				if selected_slot != 0:
-					selected_slot -= 1
+				set_selected_slot(selected_slot - 1 if selected_slot != 0 else 8)
+	elif event is InputEventKey and event.is_pressed():
+		match event.scancode:
+			KEY_1:
+				set_selected_slot(0)
+			KEY_2:
+				set_selected_slot(1)
+			KEY_3:
+				set_selected_slot(2)
+			KEY_4:
+				set_selected_slot(3)
+			KEY_5:
+				set_selected_slot(4)
+			KEY_6:
+				set_selected_slot(5)
+			KEY_7:
+				set_selected_slot(6)
+			KEY_8:
+				set_selected_slot(7)
+			KEY_9:
+				set_selected_slot(8)
+
+func set_selected_slot(slot):
+	var last_slot = selected_slot
+	selected_slot = slot
+	emit_signal("changed_selected_slot", last_slot, selected_slot)

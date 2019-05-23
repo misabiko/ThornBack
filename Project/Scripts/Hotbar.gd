@@ -15,3 +15,8 @@ onready var slots = [
 func _on_Inventory_slot_updated(slot, id, count):
 	slots[slot].get_child(0).text = String(id)
 	slots[slot].get_child(1).get_child(0).text = String(count)
+
+
+func _on_Inventory_changed_selected_slot(last_slot, new_slot):
+	slots[last_slot].color = Color(0, 0, 0, 0.5)
+	slots[new_slot].color = Color(0.5, 0.5, 0.5, 0.5)

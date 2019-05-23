@@ -7,7 +7,6 @@
 [ext_resource path="res://Scenes/Hotbar.tscn" type="PackedScene" id=5]
 [ext_resource path="res://Scripts/Hotbar.gd" type="Script" id=6]
 
-
 [sub_resource type="CylinderShape" id=1]
 radius = 0.4
 height = 1.9
@@ -50,4 +49,5 @@ script = ExtResource( 6 )
 [node name="Inventory" type="Node" parent="."]
 script = ExtResource( 4 )
 [connection signal="timeout" from="BreakTimer" to="." method="_on_BreakTimer_timeout"]
+[connection signal="changed_selected_slot" from="Inventory" to="HUD/Hotbar" method="_on_Inventory_changed_selected_slot"]
 [connection signal="slot_updated" from="Inventory" to="HUD/Hotbar" method="_on_Inventory_slot_updated"]

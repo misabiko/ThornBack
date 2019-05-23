@@ -6,7 +6,7 @@
 margin_right = 50.0
 margin_bottom = 50.0
 rect_min_size = Vector2( 60, 60 )
-color = Color( 0, 0, 0, 0.392157 )
+color = Color( 0, 0, 0, 0.501961 )
 
 [node name="ID" type="Label" parent="."]
 anchor_left = 0.5
