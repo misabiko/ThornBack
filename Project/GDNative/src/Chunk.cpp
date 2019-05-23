@@ -50,6 +50,7 @@ void Chunk::init(int x, int y, Ref<WorldData> worldData, Ref<BlockLibrary> block
 	set_translation(Vector3(x, 0, y) * CHUNK_SIZE);
 
 	staticBody = StaticBody::_new();
+	staticBody->set_collision_layer_bit(2, true);
 	add_child(staticBody);
 
 	set_mesh(ArrayMesh::_new());

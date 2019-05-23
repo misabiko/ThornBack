@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://Scripts/World.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Player.tscn" type="PackedScene" id=2]
@@ -15,6 +15,7 @@
 [ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/sand.png" type="Texture" id=13]
 [ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/gravel.png" type="Texture" id=14]
 [ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/wool_base.png" type="Texture" id=15]
+[ext_resource path="res://Scripts/ItemSpawner.gd" type="Script" id=16]
 
 [sub_resource type="Resource" id=1]
 script = ExtResource( 6 )
@@ -47,6 +48,9 @@ script = ExtResource( 5 )
 initial_radius = 2
 world_data = SubResource( 1 )
 block_library = SubResource( 2 )
+
+[node name="ItemSpawner" type="Node" parent="."]
+script = ExtResource( 16 )
 [connection signal="enter_chunk" from="Player" to="ChunkLoader" method="update_chunk_loadings"]
 [connection signal="start_breaking" from="Player" to="SelectionHighlight" method="_on_Player_start_breaking"]
 [connection signal="step_breaking" from="Player" to="SelectionHighlight" method="_on_Player_step_breaking"]
