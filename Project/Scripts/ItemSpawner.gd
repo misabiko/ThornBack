@@ -1,6 +1,7 @@
 extends Node
 
 const Item = preload("res://Scenes/Item.tscn")
+onready var player = $"../Player"
 
 func spawn_block(id, coord):
 	var item = Item.instance()

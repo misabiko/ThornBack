@@ -126,10 +126,10 @@ func _input(event):
 				BUTTON_RIGHT:
 					check_raycast()
 					
-					if $Inventory.getSelectedType() == $Inventory.ItemTypes.PLACEABLE:
+					if $Inventory.get_selected_type() == $Inventory.ItemTypes.PLACEABLE:
 						if aimed_collider and !selection_highlight.collides():
 							$"..".add_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selection_highlight.get_normal(), $Inventory.getSelectedId())
-							$Inventory.removeSelectedItem(1)
+							$Inventory.remove_selected_item(1)
 		else:
 			match event.button_index:
 				BUTTON_LEFT:
@@ -167,10 +167,13 @@ func check_raycast():
 	
 	return aimed_collider == null or moved
 
+func try_pick_up(id):
+	$Inventory.add_item(id, 1)
+	return true
+
 func _on_BreakTimer_timeout():
 	if breaking_stage == 9:
 		var pos = selection_highlight.translation - Vector3(0.5, 0.5, 0.5)
-		$Inventory.addItem($"..".get_block_id(pos), 1)
 		$"..".break_block(pos)
 		stop_breaking()
 	else:

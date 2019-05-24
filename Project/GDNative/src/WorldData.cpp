@@ -13,7 +13,7 @@ WorldData::BlockData* WorldData::getBlock(const std::pair<int, int>& chunk, cons
 }
 
 unsigned WorldData::getBlockType(const int chunkX, const int chunkY, const int x, const int y, const int z) {
-    return chunks.at(std::pair<int, int>(chunkX, chunkY)).at(x + CHUNK_SIZE * y + CHUNK_SIZE * WORLD_HEIGHT * z).type;
+	return chunks.at(std::pair<int, int>(chunkX, chunkY)).at(x + CHUNK_SIZE * y + CHUNK_SIZE * WORLD_HEIGHT * z).type;
 }
 
 void WorldData::tryInit(const std::pair<int, int>& chunk) {

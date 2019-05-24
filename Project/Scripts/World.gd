@@ -35,12 +35,13 @@ func remove_block(pos):
 func break_block(pos):
 	var selected_pos = world_to_chunk(pos)
 	var chunk_coords = get_chunk_coords(pos)
+	var id = $ChunkLoader.world_data.get_block_type(chunk_coords.x, chunk_coords.y, selected_pos.x, selected_pos.y, selected_pos.z)
 	get_node(get_chunk(pos)).clear_block(selected_pos.x, selected_pos.y, selected_pos.z)
-	$ItemSpawner.spawn_block($ChunkLoader.world_data.get_block_type(chunk_coords.x, chunk_coords.y, selected_pos.x, selected_pos.y, selected_pos.z), pos)
+	$ItemSpawner.spawn_block(id, pos)
 
 func get_block_id(pos):
-	var chunk_coords = get_chunk_coords(pos)
 	var selected_pos = world_to_chunk(pos)
+	var chunk_coords = get_chunk_coords(pos)
 	return $ChunkLoader.world_data.get_block_type(chunk_coords.x, chunk_coords.y, selected_pos.x, selected_pos.y, selected_pos.z)
 
 func _input(event):

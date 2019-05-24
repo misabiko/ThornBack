@@ -8,10 +8,7 @@ enum ItemTypes {EMPTY, PLACEABLE, REUSEABLE, DISPOSABLE}
 signal slot_updated(slot, id, count)
 signal changed_selected_slot(last_slot, new_slot)
 
-func _ready():
-	$"../DebugHelper".add_property("selected_slot", get_path())
-	$"../DebugHelper".add_method("selected_type", "getSelectedId", get_path())
-	
+func _ready():	
 	slots = []
 	slots.resize(SLOT_COUNT)
 	
@@ -21,7 +18,7 @@ func _ready():
 			"count": 0
 		}
 
-func addItem(id, count):
+func add_item(id, count):
 	if slots[selected_slot].id == -1:
 		slots[selected_slot].id = id
 		slots[selected_slot].count = count
@@ -45,26 +42,26 @@ func addItem(id, count):
 			slots[empty_slot].count = count
 			emit_signal("slot_updated", empty_slot, id, count)
 
-func removeItem(slot, count):
+func remove_item(slot, count):
 	if slots[slot].count > count:
 		slots[slot].count -= count
 		emit_signal("slot_updated", slot, slots[slot].id, slots[slot].count)
 	else:
-		clearSlot(slot)
+		clear_slot(slot)
 
-func removeSelectedItem(count):
-	removeItem(selected_slot, count)
+func remove_selected_item(count):
+	remove_item(selected_slot, count)
 
-func clearSlot(slot):
+func clear_slot(slot):
 	slots[slot].id = -1
 	slots[slot].count = 0
 	emit_signal("slot_updated", slot, -1, 0)
 
-func getSelectedId():
+func get_selectedId():
 	return slots[selected_slot].id
 
 #TODO Store ItemTypes in BlockLibrary
-func getSelectedType():
+func get_selected_type():
 	if slots[selected_slot].id < 0:
 		return ItemTypes.EMPTY
 	else:
