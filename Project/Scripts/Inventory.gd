@@ -57,7 +57,7 @@ func clear_slot(slot):
 	slots[slot].count = 0
 	emit_signal("slot_updated", slot, -1, 0)
 
-func get_selectedId():
+func get_selected_id():
 	return slots[selected_slot].id
 
 #TODO Store ItemTypes in BlockLibrary
