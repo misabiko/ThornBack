@@ -128,7 +128,7 @@ func _input(event):
 					
 					if $Inventory.get_selected_type() == $Inventory.ItemTypes.PLACEABLE:
 						if aimed_collider and !selection_highlight.collides():
-							$"..".add_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selection_highlight.get_normal(), $Inventory.getSelectedId())
+							$"..".add_block(selection_highlight.translation - Vector3(0.5, 0.5, 0.5) + selection_highlight.get_normal(), $Inventory.get_selected_id())
 							$Inventory.remove_selected_item(1)
 		else:
 			match event.button_index:
