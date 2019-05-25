@@ -20,7 +20,7 @@ void Chunk::_register_methods() {
 void Chunk::_init() {}
 
 void Chunk::_ready() {
-	get_node("../..")->call_deferred("add_chunk", Vector2(coords.first, coords.second), get_path());
+	get_node("../..")->call_deferred("add_chunk", Vector2(static_cast<real_t>(coords.first), static_cast<real_t>(coords.second)), get_path());
 	Array owners = staticBody->get_shape_owners();
 	for (int i = 0; i < owners.size(); i++)
 		staticBody->shape_owner_set_disabled(owners[i], false);
@@ -47,7 +47,7 @@ void Chunk::init(int x, int y, Ref<WorldData> worldData, Ref<BlockLibrary> block
 
 	set_visible(false);
 
-	set_translation(Vector3(x, 0, y) * CHUNK_SIZE);
+	set_translation(Vector3(x, 0, y) * static_cast<real_t>(CHUNK_SIZE));
 
 	staticBody = StaticBody::_new();
 	staticBody->set_collision_layer_bit(2, true);

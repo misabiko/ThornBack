@@ -40,7 +40,7 @@ namespace godot {
 			}
 
 			void add(const SurfaceData& surface) {
-				unsigned vertexCount = vertices.size();
+				int vertexCount = vertices.size();
 				for (int i = 0; i < vertexCount; i++)
 					vertices.append(surface.vertices[i]);
 				normals.append_array(surface.normals);

@@ -114,10 +114,10 @@ void BlockLibrary::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_ri
 	for (int i = 0; i < 4; i++)
 		surface->second.normals.push_back(normal);
 
-	surface->second.uvs.push_back(Vector2(0, h));
-	surface->second.uvs.push_back(Vector2(w, h));
+	surface->second.uvs.push_back(Vector2(0, static_cast<real_t>(h)));
+	surface->second.uvs.push_back(Vector2(static_cast<real_t>(w), static_cast<real_t>(h)));
 	surface->second.uvs.push_back(Vector2(0, 0));
-	surface->second.uvs.push_back(Vector2(w, 0));
+	surface->second.uvs.push_back(Vector2(static_cast<real_t>(w), 0));
 
 	surface->second.vertices.push_back(bottom_left);
 	surface->second.vertices.push_back(bottom_right);
@@ -128,58 +128,57 @@ void BlockLibrary::addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_ri
 void BlockLibrary::addCube(Vector3 origin, Vector3 size, const BlockLibrary::TypeData& type, std::map<unsigned, BlockLibrary::SurfaceData>& surfaces) {
 	for (int i = 0; i < 6; i++)
 		surfaces[type.materials[i]];
-	
 	addQuad(
-		origin + Vector3(0,			0,			size.z),
-		origin + Vector3(0,			size.y,		size.z),
-		origin + Vector3(size.x,	size.y,		size.z),
-		origin + Vector3(size.x,	0,			size.z),
-		size.x, size.y,
+		origin + Vector3(0,			0,			static_cast<real_t>(size.z)),
+		origin + Vector3(0,			static_cast<real_t>(size.y),		static_cast<real_t>(size.z)),
+		origin + Vector3(static_cast<real_t>(size.x),	static_cast<real_t>(size.y),		static_cast<real_t>(size.z)),
+		origin + Vector3(static_cast<real_t>(size.x),	0,			static_cast<real_t>(size.z)),
+		static_cast<int>(size.x), static_cast<int>(size.y),
 		SOUTH, surfaces.find(type.materials[0])
 	);
 	
 	addQuad(
 		origin,
-		origin + Vector3(0,			size.y,		0),
-		origin + Vector3(size.x,	size.y,		0),
-		origin + Vector3(size.x,	0,			0),
-		size.x, size.y,
+		origin + Vector3(0,			static_cast<real_t>(size.y),		0),
+		origin + Vector3(static_cast<real_t>(size.x),	static_cast<real_t>(size.y),		0),
+		origin + Vector3(static_cast<real_t>(size.x),	0,			0),
+		static_cast<int>(size.x), static_cast<int>(size.y),
 		NORTH, surfaces.find(type.materials[1])
 	);
 	
 	addQuad(
 		origin,
-		origin + Vector3(0,			size.y,		0),
-		origin + Vector3(0,			size.y,		size.z),
-		origin + Vector3(0,			0,			size.z),
-		size.z, size.y,
+		origin + Vector3(0,			static_cast<real_t>(size.y),		0),
+		origin + Vector3(0,			static_cast<real_t>(size.y),		static_cast<real_t>(size.z)),
+		origin + Vector3(0,			0,			static_cast<real_t>(size.z)),
+		static_cast<int>(size.z), static_cast<int>(size.y),
 		WEST, surfaces.find(type.materials[2])
 	);
 	
 	addQuad(
-		origin + Vector3(size.x,	0,			0),
-		origin + Vector3(size.x,	size.y,		0),
-		origin + Vector3(size.x,	size.y,		size.z),
-		origin + Vector3(size.x,	0,			size.z),
-		size.z, size.y,
+		origin + Vector3(static_cast<real_t>(size.x),	0,			0),
+		origin + Vector3(static_cast<real_t>(size.x),	static_cast<real_t>(size.y),		0),
+		origin + Vector3(static_cast<real_t>(size.x),	static_cast<real_t>(size.y),		static_cast<real_t>(size.z)),
+		origin + Vector3(static_cast<real_t>(size.x),	0,			static_cast<real_t>(size.z)),
+		static_cast<int>(size.z), static_cast<int>(size.y),
 		EAST, surfaces.find(type.materials[3])
 	);
 	
 	addQuad(
 		origin,
-		origin + Vector3(0,			0,		size.z),
-		origin + Vector3(size.x,	0,		size.z),
-		origin + Vector3(size.x,	0,			0),
-		size.x, size.z,
+		origin + Vector3(0,			0,		static_cast<real_t>(size.z)),
+		origin + Vector3(static_cast<real_t>(size.x),	0,		static_cast<real_t>(size.z)),
+		origin + Vector3(static_cast<real_t>(size.x),	0,			0),
+		static_cast<int>(size.x), static_cast<int>(size.z),
 		BOTTOM, surfaces.find(type.materials[4])
 	);
 	
 	addQuad(
-		origin + Vector3(0,			size.y,			0),
-		origin + Vector3(0,			size.y,		size.z),
-		origin + Vector3(size.x,	size.y,		size.z),
-		origin + Vector3(size.x,	size.y,			0),
-		size.x, size.z,
+		origin + Vector3(0,			static_cast<real_t>(size.y),			0),
+		origin + Vector3(0,			static_cast<real_t>(size.y),		static_cast<real_t>(size.z)),
+		origin + Vector3(static_cast<real_t>(size.x),	static_cast<real_t>(size.y),		static_cast<real_t>(size.z)),
+		origin + Vector3(static_cast<real_t>(size.x),	static_cast<real_t>(size.y),			0),
+		static_cast<int>(size.x), static_cast<int>(size.z),
 		TOP, surfaces.find(type.materials[5])
 	);
 }
