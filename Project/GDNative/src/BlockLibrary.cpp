@@ -26,7 +26,7 @@ Ref<SpatialMaterial> BlockLibrary::getMaterial(const unsigned& idx) {
 Ref<ArrayMesh> BlockLibrary::getBlockMesh(const unsigned typeId) {
 	Ref<ArrayMesh> mesh = ArrayMesh::_new();
 	std::map<unsigned, SurfaceData> surfaces;
-	addCube(Vector3(0, 0, 0), Vector3(1, 1, 1), types[typeId - 1], surfaces);
+	addCube(Vector3(-0.5, -0.5, -0.5), Vector3(1, 1, 1), types[typeId - 1], surfaces);
 
 	for (auto& [material, surface] : surfaces) {
 		Array arrays;
