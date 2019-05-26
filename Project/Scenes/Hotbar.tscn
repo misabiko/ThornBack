@@ -3,59 +3,61 @@
 [ext_resource path="res://Scenes/Slot.tscn" type="PackedScene" id=1]
 
 [node name="Hotbar" type="MarginContainer"]
-margin_left = 158.0
-margin_top = 472.0
-margin_right = 866.0
-margin_bottom = 596.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = -124.0
 custom_constants/margin_bottom = 64
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
-margin_right = 708.0
+margin_right = 1280.0
 margin_bottom = 60.0
 custom_constants/separation = 21
 alignment = 1
 
 [node name="Slot" parent="HBoxContainer" instance=ExtResource( 1 )]
-margin_right = 60.0
+margin_left = 286.0
+margin_right = 346.0
 margin_bottom = 60.0
 color = Color( 0.5, 0.5, 0.5, 0.5 )
 
 [node name="Slot2" parent="HBoxContainer" instance=ExtResource( 1 )]
-margin_left = 81.0
-margin_right = 141.0
+margin_left = 367.0
+margin_right = 427.0
 margin_bottom = 60.0
 
 [node name="Slot3" parent="HBoxContainer" instance=ExtResource( 1 )]
-margin_left = 162.0
-margin_right = 222.0
+margin_left = 448.0
+margin_right = 508.0
 margin_bottom = 60.0
 
 [node name="Slot4" parent="HBoxContainer" instance=ExtResource( 1 )]
-margin_left = 243.0
-margin_right = 303.0
+margin_left = 529.0
+margin_right = 589.0
 margin_bottom = 60.0
 
 [node name="Slot5" parent="HBoxContainer" instance=ExtResource( 1 )]
-margin_left = 324.0
-margin_right = 384.0
+margin_left = 610.0
+margin_right = 670.0
 margin_bottom = 60.0
 
 [node name="Slot6" parent="HBoxContainer" instance=ExtResource( 1 )]
-margin_left = 405.0
-margin_right = 465.0
+margin_left = 691.0
+margin_right = 751.0
 margin_bottom = 60.0
 
 [node name="Slot7" parent="HBoxContainer" instance=ExtResource( 1 )]
-margin_left = 486.0
-margin_right = 546.0
+margin_left = 772.0
+margin_right = 832.0
 margin_bottom = 60.0
 
 [node name="Slot8" parent="HBoxContainer" instance=ExtResource( 1 )]
-margin_left = 567.0
-margin_right = 627.0
+margin_left = 853.0
+margin_right = 913.0
 margin_bottom = 60.0
 
 [node name="Slot9" parent="HBoxContainer" instance=ExtResource( 1 )]
-margin_left = 648.0
-margin_right = 708.0
+margin_left = 934.0
+margin_right = 994.0
 margin_bottom = 60.0
+

@@ -42,6 +42,12 @@ config/name="ThornBack"
 run/main_scene="res://Scenes/World.tscn"
 config/icon="res://icon.png"
 
+[display]
+
+window/size/width=1280
+window/size/height=720
+window/size/resizable=false
+
 [editor_plugins]
 
 enabled=PoolStringArray( "CustomResources" )
@@ -72,6 +78,10 @@ texture={
 [layer_names]
 
 3d_physics/layer_2="Entity"
+
+[memory]
+
+limits/multithreaded_server/rid_pool_prealloc=500
 
 [rendering]
 

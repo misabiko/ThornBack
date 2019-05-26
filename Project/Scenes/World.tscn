@@ -1,28 +1,27 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://Scripts/World.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Player.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Scenes/SelectionHighlight.tscn" type="PackedScene" id=3]
-[ext_resource path="res://crossbar.png" type="Texture" id=4]
-[ext_resource path="res://Scripts/ChunkLoader.gdns" type="Script" id=5]
-[ext_resource path="res://Scripts/WorldData.gdns" type="Script" id=6]
-[ext_resource path="res://Scripts/BlockLibrary.gdns" type="Script" id=7]
-[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/dirt.png" type="Texture" id=8]
-[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/stone.png" type="Texture" id=9]
-[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/cobblestone.png" type="Texture" id=10]
-[ext_resource path="res://Resources/Blocks/grass_top.png" type="Texture" id=11]
-[ext_resource path="res://Resources/Blocks/grass_side.png" type="Texture" id=12]
-[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/sand.png" type="Texture" id=13]
-[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/gravel.png" type="Texture" id=14]
-[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/wool_base.png" type="Texture" id=15]
-[ext_resource path="res://Scripts/ItemSpawner.gd" type="Script" id=16]
+[ext_resource path="res://Scripts/ChunkLoader.gdns" type="Script" id=4]
+[ext_resource path="res://Scripts/WorldData.gdns" type="Script" id=5]
+[ext_resource path="res://Scripts/BlockLibrary.gdns" type="Script" id=6]
+[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/dirt.png" type="Texture" id=7]
+[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/stone.png" type="Texture" id=8]
+[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/cobblestone.png" type="Texture" id=9]
+[ext_resource path="res://Resources/Blocks/grass_top.png" type="Texture" id=10]
+[ext_resource path="res://Resources/Blocks/grass_side.png" type="Texture" id=11]
+[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/sand.png" type="Texture" id=12]
+[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/gravel.png" type="Texture" id=13]
+[ext_resource path="res://newstart_textures/assets/minecraft/textures/blocks/wool_base.png" type="Texture" id=14]
+[ext_resource path="res://Scripts/ItemSpawner.gd" type="Script" id=15]
 
 [sub_resource type="Resource" id=1]
-script = ExtResource( 6 )
+script = ExtResource( 5 )
 
 [sub_resource type="Resource" id=2]
-script = ExtResource( 7 )
-textures = [ ExtResource( 8 ), ExtResource( 9 ), ExtResource( 10 ), ExtResource( 11 ), ExtResource( 12 ), ExtResource( 13 ), ExtResource( 14 ), ExtResource( 15 ) ]
+script = ExtResource( 6 )
+textures = [ ExtResource( 7 ), ExtResource( 8 ), ExtResource( 9 ), ExtResource( 10 ), ExtResource( 11 ), ExtResource( 12 ), ExtResource( 13 ), ExtResource( 14 ) ]
 
 [node name="World" type="Node"]
 script = ExtResource( 1 )
@@ -36,21 +35,14 @@ transform = Transform( 0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0
 
 [node name="SelectionHighlight" parent="." instance=ExtResource( 3 )]
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-
-[node name="crossbar" type="Sprite" parent="CanvasLayer"]
-position = Vector2( 512, 300 )
-scale = Vector2( 2, 2 )
-texture = ExtResource( 4 )
-
 [node name="ChunkLoader" type="Node" parent="."]
-script = ExtResource( 5 )
+script = ExtResource( 4 )
 initial_radius = 2
 world_data = SubResource( 1 )
 block_library = SubResource( 2 )
 
 [node name="ItemSpawner" type="Node" parent="."]
-script = ExtResource( 16 )
+script = ExtResource( 15 )
 
 [connection signal="enter_chunk" from="Player" to="ChunkLoader" method="update_chunk_loadings"]
 [connection signal="start_breaking" from="Player" to="SelectionHighlight" method="_on_Player_start_breaking"]
