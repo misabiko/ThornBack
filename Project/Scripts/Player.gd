@@ -149,6 +149,10 @@ func _input(event):
 					else:
 						$Camera.fov = 70
 				$CamZoom.start()
+			KEY_Q:
+				if event.is_pressed():
+					var forward = -$Camera.global_transform.basis.z.normalized()
+					$"../ItemSpawner".spawn_block($Inventory.selected_slot + 1, global_transform.origin + 1 * forward, 4.5 * forward)
 			KEY_F:
 				if event.is_pressed():
 					flying = !flying

@@ -21,3 +21,7 @@ func _on_Area_body_entered(body):
 
 func _on_Tween_tween_completed(object, key):
 	queue_free()
+
+
+func _on_NonPickableTimer_timeout():
+	$Area/CollisionShape.disabled = false

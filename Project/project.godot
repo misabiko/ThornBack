@@ -79,10 +79,6 @@ texture={
 
 3d_physics/layer_2="Entity"
 
-[memory]
-
-limits/multithreaded_server/rid_pool_prealloc=500
-
 [rendering]
 
 threads/thread_model=2
