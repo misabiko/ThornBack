@@ -13,4 +13,11 @@ func _process(delta):
 func _on_Area_body_entered(body):
 	if body.name == "Player":
 		if body.try_pick_up(id):
-			queue_free()
+			$CollisionShape.disabled = true
+			mode = MODE_STATIC
+			$Tween.interpolate_property(self, "translation", translation, body.translation, 0.25, Tween.TRANS_CUBIC, Tween.EASE_IN)
+			$Tween.start()
+
+
+func _on_Tween_tween_completed(object, key):
+	queue_free()
