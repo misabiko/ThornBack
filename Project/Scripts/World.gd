@@ -1,7 +1,7 @@
 extends Node
 
 var chunks = {}
-onready var item_library = preload("res://Scripts/ItemLibrary.gdns").new()
+export (Resource) var item_library
 
 func _ready():
 	$ChunkLoader.init()
