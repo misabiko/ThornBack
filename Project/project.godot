@@ -24,6 +24,11 @@ _global_script_classes=[ {
 "language": "NativeScript",
 "path": "res://Scripts/ChunkLoader.gdns"
 }, {
+"base": "",
+"class": "ItemLibrary",
+"language": "NativeScript",
+"path": "res://Scripts/ItemLibrary.gdns"
+}, {
 "base": "Resource",
 "class": "WorldData",
 "language": "NativeScript",
@@ -33,6 +38,7 @@ _global_script_class_icons={
 "BlockLibrary": "",
 "Chunk": "",
 "ChunkLoader": "",
+"ItemLibrary": "",
 "WorldData": ""
 }
 
@@ -78,6 +84,10 @@ texture={
 [layer_names]
 
 3d_physics/layer_2="Entity"
+
+[memory]
+
+limits/multithreaded_server/rid_pool_prealloc=500
 
 [rendering]
 
