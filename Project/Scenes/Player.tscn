@@ -62,7 +62,6 @@ stretch_mode = 3
 
 [node name="Inventory" type="Node" parent="."]
 script = ExtResource( 7 )
-
 [connection signal="timeout" from="BreakTimer" to="." method="_on_BreakTimer_timeout"]
 [connection signal="changed_selected_slot" from="Inventory" to="HUD/Hotbar" method="_on_Inventory_changed_selected_slot"]
 [connection signal="slot_updated" from="Inventory" to="HUD/Hotbar" method="_on_Inventory_slot_updated"]

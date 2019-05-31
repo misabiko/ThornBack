@@ -10,7 +10,7 @@ BlockLibrary::~BlockLibrary() {
 }
 
 void BlockLibrary::_register_methods() {
-	register_property<BlockLibrary, Array>("textures", &BlockLibrary::set_textures, &BlockLibrary::get_textures, Array(), GODOT_METHOD_RPC_MODE_DISABLED, GODOT_PROPERTY_USAGE_DEFAULT, GODOT_PROPERTY_HINT_TYPE_STRING, "17/17:Texture");
+	register_property<BlockLibrary, Array>("textures", &BlockLibrary::setTextures, &BlockLibrary::getTextures, Array(), GODOT_METHOD_RPC_MODE_DISABLED, GODOT_PROPERTY_USAGE_DEFAULT, GODOT_PROPERTY_HINT_TYPE_STRING, "17/17:Texture");
 	register_method("get_material", &BlockLibrary::getMaterial);
 	register_method("get_block_mesh", &BlockLibrary::getBlockMesh);
 }
@@ -43,7 +43,7 @@ Ref<ArrayMesh> BlockLibrary::getBlockMesh(const unsigned typeId) {
 	return mesh;
 }
 
-void BlockLibrary::set_textures(Array textures) {
+void BlockLibrary::setTextures(Array textures) {
 	this->textures = textures;
 
 	materials.resize(textures.size());
@@ -62,7 +62,7 @@ void BlockLibrary::set_textures(Array textures) {
 	types.emplace_back("Wool", 7);					//7
 }
 
-Array BlockLibrary::get_textures() {
+Array BlockLibrary::getTextures() {
 	return textures;
 }
 

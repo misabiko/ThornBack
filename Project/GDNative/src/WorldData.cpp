@@ -29,15 +29,15 @@ void WorldData::tryInit(const std::pair<int, int>& chunk) {
 		for (int z = 0; z < CHUNK_SIZE; z++) {
 			Vector2 n = Vector2((x + chunkX) / 5.0f, (z + chunkY) / 5.0f) / 20 - Vector2(0.5, 0.5);
 						
-			float e1 = ease((0.5 + noiseE->get_noise_2dv(7.567 * n) / 2) + 0.02, -8.57);
+			double e1 = ease((0.5 + noiseE->get_noise_2dv(static_cast<real_t>(7.567) * n) / 2) + 0.02, -8.57);
 			
-			float e2 = ease(((0.244 * noiseE->get_noise_2dv(9.588 * n) * e1) + 1) / 2 + 0.041, -3.36) * 2 - 1;
+			double e2 = ease(((0.244 * noiseE->get_noise_2dv(static_cast<real_t>(9.588) * n) * e1) + 1) / 2 + 0.041, -3.36) * 2 - 1;
 			
-			float e3 = ease(((0.182 * noiseE->get_noise_2dv(25.246 * n) * std::max<double>(e1 - 0.433, 0)) + 1) / 2 , -1.57) * 2 - 1;
+			double e3 = ease(((0.182 * noiseE->get_noise_2dv(static_cast<real_t>(25.246) * n) * std::max<double>(e1 - 0.433, 0)) + 1) / 2 , -1.57) * 2 - 1;
 			
-			float e = e2 + e3;
+			double e = e2 + e3;
 
-			y = std::floor(std::clamp<double>((e + 3) * 15.3, 0, 127));
+			y = static_cast<int>(std::floor(std::clamp<double>((e + 3) * 15.3, 0, 127)));
 
 			getBlock(it.first, x, y, z)->set(4, true);
 
@@ -77,16 +77,16 @@ void WorldData::load() {
 		unsigned currType;
 
 		while (!saveFile->eof_reached()) {
-			coords.first = saveFile->get_32();
-			coords.second = saveFile->get_32();
+			coords.first = static_cast<int>(saveFile->get_32());
+			coords.second = static_cast<int>(saveFile->get_32());
 
 			chunks.emplace(coords, std::vector<BlockData>(CHUNK_VOLUME));
 			auto it = chunks.at(coords).begin();
 
-			while (numSameBlocks = saveFile->get_32()) {
-				currType = saveFile->get_8();
+			while (numSameBlocks = static_cast<unsigned>(saveFile->get_32())) {
+				currType = static_cast<unsigned>(saveFile->get_8());
 
-				for (int i = 0; i < numSameBlocks; i++, it++)
+				for (unsigned i = 0; i < numSameBlocks; i++, it++)
 					it->set(currType, currType != 0);
 			}
 		}

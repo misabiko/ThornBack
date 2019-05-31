@@ -47,7 +47,7 @@ void Chunk::init(int x, int y, Ref<WorldData> worldData, Ref<BlockLibrary> block
 
 	set_visible(false);
 
-	set_translation(Vector3(x, 0, y) * static_cast<real_t>(CHUNK_SIZE));
+	set_translation(Vector3(static_cast<real_t>(x), 0, static_cast<real_t>(y)) * static_cast<real_t>(CHUNK_SIZE));
 
 	staticBody = StaticBody::_new();
 	staticBody->set_collision_layer_bit(2, true);
@@ -151,7 +151,7 @@ void Chunk::collisionMesher() {
 					cubeSize.y += WORLD_HEIGHT - j - 1;	//This is skipped if goto fullbreak3
 					fullbreak3:
 
-					pos = Vector3(i, j, k);
+					pos = Vector3(static_cast<real_t>(i), static_cast<real_t>(j), static_cast<real_t>(k));
 
 					Ref<BoxShape> box;
 					box.instance();

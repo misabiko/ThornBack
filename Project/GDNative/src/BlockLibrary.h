@@ -87,9 +87,9 @@ namespace godot {
 
 		Ref<ArrayMesh> getBlockMesh(const unsigned typeId);
 
-		void set_textures(Array textures);
+		void setTextures(Array textures);
 
-		Array get_textures();
+		Array getTextures();
 
 		void addQuad(Vector3 bottom_left, Vector3 top_left, Vector3 top_right, Vector3 bottom_right, int w, int h, Direction side, std::map<unsigned, BlockLibrary::SurfaceData>::iterator surface);
 

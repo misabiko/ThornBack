@@ -46,7 +46,7 @@ void ChunkLoader::_init() {
 void ChunkLoader::init() {
 	worldData->load();
 
-	float backlogSize = initialRadius * initialRadius * 4;
+	float backlogSize = static_cast<float>(initialRadius * initialRadius * 4.0);
 	float numLoaded = 0;
 
 	for (int x = -initialRadius; x < initialRadius; x++) {
@@ -69,7 +69,7 @@ void ChunkLoader::_process(float delta) {
 }
 
 void ChunkLoader::updateChunkLoadings(Vector2 coords) {
-	lastCoords = std::pair<int, int>(coords.x, coords.y);
+	lastCoords = std::make_pair(static_cast<int>(coords.x), static_cast<int>(coords.y));
 	loadingBacklog.clear();
 
 	for (int x = lastCoords.first - radius; x < lastCoords.first + radius; x++)
@@ -102,7 +102,7 @@ void ChunkLoader::loadChunk(Variant userdata) {
 		mutex->lock();
 
 		if (hasBacklog = !loadingBacklog.empty())
-			OS::get_singleton()->delay_msec(std::min<int>((std::pow(loadingBacklog.front().first - lastCoords.first, 2) + std::pow(loadingBacklog.front().second - lastCoords.second, 2)) * 10, 100));
+			OS::get_singleton()->delay_msec(std::min(static_cast<int>(std::pow(loadingBacklog.front().first - lastCoords.first, 2) + std::pow(loadingBacklog.front().second - lastCoords.second, 2)) * 10, 100));
 	}
 	
 	mutex->unlock();
@@ -120,7 +120,7 @@ int ChunkLoader::getRadius() {
 }
 
 int ChunkLoader::getBacklogSize() {
-	return loadingBacklog.size();
+	return static_cast<int>(loadingBacklog.size());
 }
 
 void ChunkLoader::save() {

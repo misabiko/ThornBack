@@ -32,6 +32,7 @@ selection_highlight_nodepath = NodePath("../SelectionHighlight")
 
 [node name="DirectionalLight" type="DirectionalLight" parent="."]
 transform = Transform( 0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 0, 0 )
+light_energy = 0.8
 
 [node name="SelectionHighlight" parent="." instance=ExtResource( 3 )]
 
@@ -43,7 +44,6 @@ block_library = SubResource( 2 )
 
 [node name="ItemSpawner" type="Node" parent="."]
 script = ExtResource( 15 )
-
 [connection signal="enter_chunk" from="Player" to="ChunkLoader" method="update_chunk_loadings"]
 [connection signal="start_breaking" from="Player" to="SelectionHighlight" method="_on_Player_start_breaking"]
 [connection signal="step_breaking" from="Player" to="SelectionHighlight" method="_on_Player_step_breaking"]
