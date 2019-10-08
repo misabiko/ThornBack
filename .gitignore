@@ -7,6 +7,7 @@ newstart_textures/
 Project/GDNative/.sconsign.dblite
 *.pdb
 *.obj
+godot-cpp/api.json
 
 m5x7.ttf
 
