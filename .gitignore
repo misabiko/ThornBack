@@ -9,3 +9,5 @@ Project/GDNative/.sconsign.dblite
 *.obj
 
 m5x7.ttf
+
+.idea/
