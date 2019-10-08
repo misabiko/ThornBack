@@ -16,6 +16,7 @@ Ref<ArrayMesh> ItemLibrary::getItemMesh(const unsigned typeId) {
 	MeshData data;
 
 	Ref<Image> img = ((Ref<Texture>)textures[typeId])->get_data();
+	img->lock();
 	for (int y = 0; y < img->get_height(); y++)
 		for (int x = 0; x < img->get_width(); x++) {
 			Color pixel = img->get_pixel(x, y);
@@ -23,6 +24,7 @@ Ref<ArrayMesh> ItemLibrary::getItemMesh(const unsigned typeId) {
 				addQuad(data, pixel, x, y, true);
 			}
 		}
+	img->unlock();
 
 	mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, data.getArrays());
 	return mesh;
