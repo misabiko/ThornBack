@@ -24,9 +24,16 @@ Ref<SpatialMaterial> BlockLibrary::getMaterial(const unsigned& idx) {
 }
 
 Ref<ArrayMesh> BlockLibrary::getBlockMesh(const unsigned typeId) {
+	if (typeId >= types.size()) {
+		Godot::print("Ignoring get_block_mesh");
+		return Ref<ArrayMesh>();
+	}
+
 	Ref<ArrayMesh> mesh = ArrayMesh::_new();
 	std::map<unsigned, SurfaceData> surfaces;
+	Godot::print("pre crash");
 	addCube(Vector3(-0.5, -0.5, -0.5), Vector3(1, 1, 1), types[typeId - 1], surfaces);
+	Godot::print("post crash");
 
 	for (auto& [material, surface] : surfaces) {
 		Array arrays;

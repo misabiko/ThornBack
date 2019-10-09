@@ -150,7 +150,7 @@ func _input(event):
 						$Camera.fov = 70
 				$CamZoom.start()
 			KEY_Q:
-				if event.is_pressed():
+				if event.is_pressed() and $Inventory.selected_slot + 1 < 6:
 					var forward = -$Camera.global_transform.basis.z.normalized()
 					$"../ItemSpawner".spawn_block($Inventory.selected_slot + 1, global_transform.origin + 1 * forward, 4.5 * forward)
 			KEY_F:
