@@ -87,9 +87,8 @@ void ChunkLoader::updateChunkLoadings(Vector2 coords) {
 
 void ChunkLoader::loadChunk(Variant userdata) {
 	mutex->lock();
-	bool hasBacklog = !loadingBacklog.empty();
 
-	while (!quitRequested && loadChunks && hasBacklog) {
+	while (!quitRequested && loadChunks && !loadingBacklog.empty()) {
 		std::pair<int, int> coords = loadingBacklog.front();
 		loadingBacklog.pop_front();
 		mutex->unlock();
@@ -101,7 +100,7 @@ void ChunkLoader::loadChunk(Variant userdata) {
 
 		mutex->lock();
 
-		if (hasBacklog = !loadingBacklog.empty())
+		if (!loadingBacklog.empty())
 			OS::get_singleton()->delay_msec(std::min(static_cast<int>(std::pow(loadingBacklog.front().first - lastCoords.first, 2) + std::pow(loadingBacklog.front().second - lastCoords.second, 2)) * 10, 100));
 	}
 	
