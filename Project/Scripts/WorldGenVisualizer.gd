@@ -4,6 +4,8 @@ extends Node
 const CHUNK_SIZE : int = 16
 const WORLD_HEIGHT : int = 256
 
+export(float, 0.01, 2) var resolution = 1 setget set_resolution
+
 export(OpenSimplexNoise) var e_noise = OpenSimplexNoise.new()
 export(OpenSimplexNoise) var m_noise = OpenSimplexNoise.new()
 export(int) var seed_e setget set_seed_e
@@ -13,7 +15,7 @@ export(bool) var do_floor := false setget set_do_floor
 export(bool) var show_map := true setget set_show_map
 export(bool) var show_moisture := false setget set_show_moisture
 export(bool) var show_moisture_h := true setget set_show_moisture_h
-export(int, 0, 256) var surface_height = 60 setget set_surface_height
+#export(int, 0, 256) var surface_height = 60 setget set_surface_height
 export(float, 0, 2) var freq1 = 1 setget set_freq1
 export(float, 0, 2) var freq2 = 1 setget set_freq2
 export(float, 0, 2) var freq3 = 1 setget set_freq3
@@ -84,7 +86,7 @@ func custom():
 	if show_map:
 		for i in range(CHUNK_SIZE * radius):
 			for j in range(CHUNK_SIZE * radius):
-				var n = Vector2(i, j) / CHUNK_SIZE - Vector2.ONE * 0.5 * radius
+				var n = Vector2(i, j) / (CHUNK_SIZE * resolution) - Vector2.ONE * 0.5 * radius / resolution
 				var e : float
 				var color : Color
 				var c : float = 1
@@ -224,6 +226,10 @@ func biome(e, m):
 	else:
 		return Color(0, 0.52, 0.125, 1)
 
+func set_resolution(new_res):
+	resolution = new_res
+	update()
+
 func set_seed_e(new_seed):
 	seed_e = new_seed
 	e_noise.seed = seed_e
@@ -248,9 +254,9 @@ func set_show_moisture_h(new_show_moisture_h):
 	show_moisture_h = new_show_moisture_h
 	update()
 
-func set_surface_height(new_surface_height):
-	surface_height = new_surface_height
-	update()
+#func set_surface_height(new_surface_height):
+#	surface_height = new_surface_height
+#	update()
 func set_radius(new_radius):
 	radius = new_radius
 	if has_node("Map"):
